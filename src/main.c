@@ -24,6 +24,16 @@ __IO uint8_t WLAN_CAN_SHUTDOWN;
 
 /* Private functions ---------------------------------------------------------*/
 
+void setup()
+{
+
+}
+
+void loop()
+{
+
+}
+
 /*******************************************************************************
  * Function Name  : main.
  * Description    : main routine.
@@ -39,40 +49,43 @@ int main(void)
 	//
 	//Initialize CC3000's CS, EN and INT pins to their default states
 	//
-	CC3000_WIFI_Init();
+	//CC3000_WIFI_Init();
 
 	//
 	// Configure & initialize CC3000 SPI_DMA Interface
 	//
-	CC3000_SPI_DMA_Init();
+	//CC3000_SPI_DMA_Init();
 
 	//
 	// WLAN On API Implementation
 	//
-	wlan_init(WLAN_Async_Callback, WLAN_Firmware_Patch, WLAN_Driver_Patch, WLAN_BootLoader_Patch,
-				CC3000_Read_Interrupt_Pin, CC3000_Interrupt_Enable, CC3000_Interrupt_Disable, CC3000_Write_Enable_Pin);
+	//wlan_init(WLAN_Async_Callback, WLAN_Firmware_Patch, WLAN_Driver_Patch, WLAN_BootLoader_Patch,
+	//			CC3000_Read_Interrupt_Pin, CC3000_Interrupt_Enable, CC3000_Interrupt_Disable, CC3000_Write_Enable_Pin);
 
 	//
 	// Trigger a WLAN device
 	//
-	wlan_start(0);
+	//wlan_start(0);
 
 	//WLAN device initalization completed
-	LED_On(LED2);
+	//LED_On(LED2);
 
 	//
 	// Mask out all non-required events from CC3000
 	//
-	wlan_set_event_mask(HCI_EVNT_WLAN_KEEPALIVE | HCI_EVNT_WLAN_UNSOL_INIT | HCI_EVNT_WLAN_UNSOL_DHCP | HCI_EVNT_WLAN_ASYNC_PING_REPORT);
+	//wlan_set_event_mask(HCI_EVNT_WLAN_KEEPALIVE | HCI_EVNT_WLAN_UNSOL_INIT | HCI_EVNT_WLAN_UNSOL_DHCP | HCI_EVNT_WLAN_ASYNC_PING_REPORT);
 
 	//
 	// Start the Smart Config process
 	//
-	wlan_smart_config_start(1);
+	//wlan_smart_config_start(1);
+
+	setup();
 
 	/* Main loop */
 	while (1)
 	{
+		loop();
 	}
 }
 

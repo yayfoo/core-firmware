@@ -17,6 +17,7 @@
 #include "hw_config.h"
 #include "hci.h"
 #include "wlan.h"
+#include "arduinito.h"
 
 /* Exported types ------------------------------------------------------------*/
 

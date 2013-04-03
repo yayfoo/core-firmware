@@ -26,7 +26,7 @@ __IO uint8_t WLAN_CAN_SHUTDOWN;
 
 void setup()
 {
-
+	digitalWrite(255, 255);
 }
 
 void loop()

@@ -7,14 +7,20 @@
 
 #include "application.h"
 
+#define LED 0
+#define BUTTON 1
+
+int i = 0;
+
 void setup() {
-	pinMode(0, OUTPUT);
-	digitalWrite(0, LOW);
+	pinMode(LED, OUTPUT);
+	digitalWrite(LED, LOW);
 }
 
 void loop() {
 	delay(1000);
-	digitalWrite(0, HIGH);
+	digitalWrite(LED, HIGH);
 	delay(1000);
-	digitalWrite(0, LOW);
+	digitalWrite(LED, LOW);
+	i++;
 }

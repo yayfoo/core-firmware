@@ -184,18 +184,12 @@ void analogWrite(uint8_t pin, uint8_t value) {
  * 		  At some point we'll have to figure that out, though.
  */
 uint32_t millis() {
-	/*
-	 * Basically, this should return the number of milliseconds since the processor started up.
-	 * If we simply store it in a uint32_t, this will be accurate for roughly 49 days.
-	 * At that point, it should reset gracefully.
-	 */
-
 	// TODO: Implement this.
 }
 
 /*
  * @brief This should block for a certain number of milliseconds.
- *        There are a million ways to implement this, but I borrowed the one that Wiring/Arduino use;
+ *        There are a number of ways to implement this, but I borrowed the one that Wiring/Arduino uses;
  *        Using the millis() function to check if a certain amount of time has passed.
  */
 void delay(uint32_t ms) {

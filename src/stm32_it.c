@@ -13,6 +13,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "hw_config.h" 
 #include "stm32_it.h"
+#include "spark_wiring.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -146,10 +147,8 @@ void PendSV_Handler(void)
  *******************************************************************************/
 void SysTick_Handler(void)
 {
-	//TimingDelay_Decrement();
-
-	/* Toggle the LED1 every 100ms */
-	LED_Toggle(LED1);
+	TimingDelay_Decrement();
+	Millis_Increment();
 
 	hci_unsolicited_event_handler();
 }

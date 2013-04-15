@@ -10,6 +10,19 @@
 
 #include "stm32f10x.h"
 
+/*
+ * Basic variables
+ */
+
+#define HIGH 0x1
+#define LOW 0x0
+
+#define true 0x1
+#define false 0x0
+
+#define STM32_DELAY_US_MULT 12 // TODO: Fix this.
+
+#define NULL ((void *)0)
 
 /*
  * Pin mapping. Borrowed from Wiring
@@ -67,26 +80,6 @@
 #define MISO 5
 #define MOSI 4
 
-typedef struct stm32_pin_info {
-  GPIO_TypeDef *gpio_peripheral;
-  uint8_t gpio_pin;
-} stm32_pin_info;
-
-
-/*
- * Basic variables
- */
-
-#define HIGH 0x1
-#define LOW 0x0
-
-#define true 0x1
-#define false 0x0
-
-/*
- * GPIO
- */
-
 typedef enum PinMode {
   OUTPUT,
   INPUT,
@@ -94,13 +87,39 @@ typedef enum PinMode {
   INPUT_PULLDOWN
 } PinMode;
 
+typedef struct stm32_pin_info {
+  GPIO_TypeDef *gpio_peripheral;
+  uint8_t gpio_pin;
+  uint8_t adc_channel;
+  TIM_TypeDef *timer_peripheral;
+  uint8_t timer_ch;
+  PinMode pin_mode;
+} stm32_pin_info;
+
+
+/*
+ * GPIO
+ */
+
+
 void pinMode(uint8_t pin, PinMode mode);
 
 void digitalWrite(uint8_t pin, uint8_t value);
 
 uint32_t digitalRead(uint8_t pin);
 
+void analogWrite(uint8_t value);
+
 uint16_t analogRead(uint8_t pin);
 
+/*
+ * TIMING
+ */
+
+uint32_t millis();
+void delay(uint32_t ms);
+void delayMicroseconds(uint32_t us);
+
+void
 
 #endif /* SPARK_WIRING_H_ */

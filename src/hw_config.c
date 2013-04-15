@@ -63,8 +63,8 @@ void Set_System(void)
     //PB_Init(BUTTON1, BUTTON_MODE_GPIO);
     //PB_Init(BUTTON2, BUTTON_MODE_GPIO);
 
-	/* Setup SysTick Timer for 100 msec interrupts  */
-	if (SysTick_Config(SystemCoreClock / 10))
+	/* Setup SysTick Timer for 1 msec interrupts  */
+	if (SysTick_Config(SystemCoreClock / 1000))
 	{
 		/* Capture error */
 		while (1)

@@ -17,7 +17,7 @@ uint8_t adcFirstTime = true;
  * Pin mapping
  */
 
-extern const stm2_pin_info PIN_MAP[TOTAL_PINS] = {
+extern struct stm32_pin_info PIN_MAP[TOTAL_PINS] = {
   {GPIOB, 7},
   {GPIOB, 6},
   {GPIOB, 5},
@@ -45,21 +45,21 @@ extern const stm2_pin_info PIN_MAP[TOTAL_PINS] = {
  * Basic variables
  */
 
-void pinMode(uint8_t pin, PinMode mode) {
+void pinMode(uint8_t pin, PinMode setMode) {
 
   GPIO_TypeDef *gpio = PIN_MAP[pin].gpio_peripheral;
   uint8_t gpio_pin = PIN_MAP[pin].gpio_pin;
 
-  switch(mode) {
-    case OUTPUT:
-      GPIO_InitTypeDef  GPIO_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
 
-      uint32_t RCC_Periph;
-      if (gpio = GPIOA)
-        {RCC_Periph = RCC_APB2Periph_GPIOA}
-      else if (gpio = GPIOB)
-        {RCC_Periph = RCC_APB2Periph_GPIOB}
-      RCC_APB2PeriphClockCmd(RCC_Periph, ENABLE);
+  switch(setMode) {
+    case OUTPUT:
+
+      if (gpio == GPIOA) {
+    	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+      } else if (gpio == GPIOB) {
+    	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+      }
 
       /* Configure the GPIO_LED pin */
       GPIO_InitStructure.GPIO_Pin = gpio_pin;
@@ -86,7 +86,7 @@ void adcInit() {
   ADC_InitStructure.ADC_ScanConvMode = ENABLE;
   ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
   ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-  ADC_InitStructure.ADC_DataAlign = DC_DataAlign_Right;
+  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
   ADC_InitStructure.ADC_NbrOfChannel = 9;
 
   ADC_Init(ADC1, &ADC_InitStructure);
@@ -98,7 +98,7 @@ void digitalWrite(uint8_t pin, uint8_t value) {
   }
 
   if (value == HIGH) {
-    PIN_MAP[pin].gpio_peripheral>BRR = PIN_MAP[pin].gpio_pin;
+    PIN_MAP[pin].gpio_peripheral->BRR = PIN_MAP[pin].gpio_pin;
   }
   else if (value == LOW) {
     PIN_MAP[pin].gpio_peripheral->BSRR = PIN_MAP[pin].gpio_pin;
@@ -108,7 +108,7 @@ void digitalWrite(uint8_t pin, uint8_t value) {
 
 uint32_t digitalRead(uint8_t pin) {
   if (pin >= TOTAL_PINS) {
-    return;
+    return -1;
   }
 
   return GPIO_ReadInputDataBit(PIN_MAP[pin].gpio_peripheral, PIN_MAP[pin].gpio_pin);
@@ -118,7 +118,7 @@ uint16_t analogRead(uint8_t pin) {
   pin = pin + FIRST_ANALOG_PIN;
 
   if (pin >= TOTAL_PINS) {
-    return;
+    return -1;
   }
 
   if (adcFirstTime == true) {
@@ -126,7 +126,7 @@ uint16_t analogRead(uint8_t pin) {
     adcFirstTime = false;
   }
 
-
+  return GPIO_ReadInputDataBit(PIN_MAP[pin].gpio_peripheral, PIN_MAP[pin].gpio_pin);
 
 
 }

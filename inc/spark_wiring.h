@@ -8,6 +8,8 @@
 #ifndef SPARK_WIRING_H_
 #define SPARK_WIRING_H_
 
+#include "stm32f10x.h"
+
 
 /*
  * Pin mapping. Borrowed from Wiring
@@ -68,9 +70,7 @@
 typedef struct stm32_pin_info {
   GPIO_TypeDef *gpio_peripheral;
   uint8_t gpio_pin;
-};
-
-extern const stm32_pin_info PIN_MAP[];
+} stm32_pin_info;
 
 
 /*
@@ -79,6 +79,9 @@ extern const stm32_pin_info PIN_MAP[];
 
 #define HIGH 0x1
 #define LOW 0x0
+
+#define true 0x1
+#define false 0x0
 
 /*
  * GPIO

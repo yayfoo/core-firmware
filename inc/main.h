@@ -18,7 +18,7 @@
 #include "hci.h"
 #include "wlan.h"
 #include "spark_wiring.h"
-#include "application.c"
+#include "application.h"
 
 /* Exported types ------------------------------------------------------------*/
 

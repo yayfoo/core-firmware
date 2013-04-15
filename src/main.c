@@ -24,16 +24,6 @@ __IO uint8_t WLAN_CAN_SHUTDOWN;
 
 /* Private functions ---------------------------------------------------------*/
 
-void setup()
-{
-	digitalWrite(255, 255);
-}
-
-void loop()
-{
-
-}
-
 /*******************************************************************************
  * Function Name  : main.
  * Description    : main routine.

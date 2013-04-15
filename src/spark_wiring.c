@@ -1,14 +1,11 @@
 /*
- * Arduinito.c
+ * spark_wiring.c
  *
- * Arduinito is a little Arduino implementation.
- * Designed to run on the STM32, using the ST Standard Peripheral Library.
- *
- *  Created on: Apr 3, 2013
- *      Author: Zach Supalla
+ *  Created on: Apr 15, 2013
+ *      Author: zsupalla
  */
 
-#include "arduinito.h"
+#include "spark_wiring.h"
 
 /*
  * Globals
@@ -87,7 +84,7 @@ void adcInit() {
 
   ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
   ADC_InitStructure.ADC_ScanConvMode = ENABLE;
-  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE; 
+  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
   ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
   ADC_InitStructure.ADC_DataAlign = DC_DataAlign_Right;
   ADC_InitStructure.ADC_NbrOfChannel = 9;
@@ -106,7 +103,7 @@ void digitalWrite(uint8_t pin, uint8_t value) {
   else if (value == LOW) {
     PIN_MAP[pin].gpio_peripheral->BSRR = PIN_MAP[pin].gpio_pin;
   }
-  
+
 }
 
 uint32_t digitalRead(uint8_t pin) {

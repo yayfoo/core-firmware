@@ -17,7 +17,8 @@
 #include "hw_config.h"
 #include "hci.h"
 #include "wlan.h"
-#include "arduinito.h"
+#include "spark_wiring.h"
+#include "application.c"
 
 /* Exported types ------------------------------------------------------------*/
 

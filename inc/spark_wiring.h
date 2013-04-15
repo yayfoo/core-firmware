@@ -1,12 +1,13 @@
 /*
- * arduinito.h
+ * spark_wiring.h
  *
- *  Created on: Apr 3, 2013
- *      Author: Zach Supalla
+ *  Created on: Apr 15, 2013
+ *      Author: zsupalla
  */
 
-#ifndef ARDUINITO_H_
-#define ARDUINITO_H_
+#ifndef SPARK_WIRING_H_
+#define SPARK_WIRING_H_
+
 
 /*
  * Pin mapping. Borrowed from Wiring
@@ -94,8 +95,9 @@ void pinMode(uint8_t pin, PinMode mode);
 
 void digitalWrite(uint8_t pin, uint8_t value);
 
-uint32 digitalRead(uint8_t pin);
+uint32_t digitalRead(uint8_t pin);
 
-uint16 analogRead(uint8_t pin);
+uint16_t analogRead(uint8_t pin);
 
-#endif /* ARDUINITO_H_ */
+
+#endif /* SPARK_WIRING_H_ */

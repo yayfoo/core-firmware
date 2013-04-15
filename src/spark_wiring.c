@@ -19,9 +19,9 @@ uint8_t adcFirstTime = true;
 
 extern struct stm32_pin_info PIN_MAP[TOTAL_PINS] = {
   /*
-   * gpio_peripheral (GPIOA or GPIOB)
+   * gpio_peripheral (GPIOA or GPIOB; not using GPIOC)
    * gpio_pin (0-15)
-   * adc_channel (0-9 or NULL)
+   * adc_channel (0-9 or NULL. Note we don't define the peripheral because our chip only has one)
    * timer_peripheral (TIM1 - TIM4, or NULL)
    * timer_ch (1-4, or NULL)
    * pin_mode (NULL by default, can be set to OUTPUT, INPUT, or other types)

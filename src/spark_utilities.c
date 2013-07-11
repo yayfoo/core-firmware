@@ -38,8 +38,6 @@ char msgBuff[SPARK_BUF_LEN];
 
 static void handle_message(void);
 static int Spark_Send_Device_Message(long socket, char * cmd, char * cmdparam, char * cmdvalue);
-static unsigned char itoa(int cNum, char *cString);
-static uint8_t atoc(char data);
 
 /*
 static uint16_t atoshort(char b1, char b2);
@@ -321,7 +319,7 @@ static int Spark_Send_Device_Message(long socket, char * cmd, char * cmdparam, c
 }
 
 // brief  Convert integer to ASCII in decimal base
-static unsigned char itoa(int cNum, char *cString)
+unsigned char itoa(int cNum, char *cString)
 {
     char* ptr;
     int uTemp = cNum;
@@ -357,8 +355,117 @@ static unsigned char itoa(int cNum, char *cString)
     return length;
 }
 
+// Convert unsigned integer to ASCII in decimal base
+unsigned char utoa(unsigned int cNum, char *cString)
+{
+    char* ptr;
+    unsigned int uTemp = cNum;
+    unsigned char length;
+
+    // value 0 is a special case
+    if (cNum == 0)
+    {
+        length = 1;
+        *cString = '0';
+
+        return length;
+    }
+
+    // Find out the length of the number, in decimal base
+    length = 0;
+    while (uTemp > 0)
+    {
+        uTemp /= 10;
+        length++;
+    }
+
+    // Do the actual formatting, right to left
+    uTemp = cNum;
+    ptr = cString + length;
+    while (uTemp > 0)
+    {
+        --ptr;
+        *ptr = digits[uTemp % 10];
+        uTemp /= 10;
+    }
+
+    return length;
+}
+
+unsigned char ltoa(long int cNum, char *cString)
+{
+    char* ptr;
+    long int uTemp = cNum;
+    unsigned char length;
+
+    // value 0 is a special case
+    if (cNum == 0)
+    {
+        length = 1;
+        *cString = '0';
+
+        return length;
+    }
+
+    // Find out the length of the number, in decimal base
+    length = 0;
+    while (uTemp > 0)
+    {
+        uTemp /= 10;
+        length++;
+    }
+
+    // Do the actual formatting, right to left
+    uTemp = cNum;
+    ptr = cString + length;
+    while (uTemp > 0)
+    {
+        --ptr;
+        *ptr = digits[uTemp % 10];
+        uTemp /= 10;
+    }
+
+    return length;
+}
+
+unsigned char ultoa(unsigned long int cNum, char *cString)
+{
+    char* ptr;
+    unsigned long int uTemp = cNum;
+    unsigned char length;
+
+    // value 0 is a special case
+    if (cNum == 0)
+    {
+        length = 1;
+        *cString = '0';
+
+        return length;
+    }
+
+    // Find out the length of the number, in decimal base
+    length = 0;
+    while (uTemp > 0)
+    {
+        uTemp /= 10;
+        length++;
+    }
+
+    // Do the actual formatting, right to left
+    uTemp = cNum;
+    ptr = cString + length;
+    while (uTemp > 0)
+    {
+        --ptr;
+        *ptr = digits[uTemp % 10];
+        uTemp /= 10;
+    }
+
+    return length;
+}
+
 //Convert nibble to hexdecimal from ASCII
-static uint8_t atoc(char data)
+unsigned char atoc(char data)
 {
 	unsigned char ucRes;
 
@@ -394,6 +501,21 @@ static uint8_t atoc(char data)
 		}
 	}
 	return ucRes;
+}
+
+// Convert ASCII to unsigned integer
+unsigned int atou(char *cString)
+{
+	unsigned int cNum = 0;
+	if (cString)
+	{
+		while (*cString && *cString <= '9' && *cString >= '0')
+		{
+			cNum = (cNum * 10) + (*cString - '0');
+			cString++;
+		}
+	}
+	return cNum;
 }
 
 /*

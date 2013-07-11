@@ -32,4 +32,11 @@ void loop() __attribute__ ((weak));
 
 extern void (*pHandleMessage)(void);
 
+unsigned char itoa(int cNum, char *cString);
+unsigned char utoa(unsigned int cNum, char *cString);
+unsigned char ltoa(long int cNum, char *cString);
+unsigned char ultoa(unsigned long int cNum, char *cString);
+unsigned char atoc(char data);
+unsigned int atou(char *cString);
+
 #endif  /* __SPARK_UTILITIES_H */

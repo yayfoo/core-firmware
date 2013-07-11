@@ -14,6 +14,8 @@
  * Basic variables
  */
 
+typedef int boolean;
+
 #define HIGH 0x1
 #define LOW 0x0
 

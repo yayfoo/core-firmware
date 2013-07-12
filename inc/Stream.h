@@ -25,6 +25,10 @@
 #include <inttypes.h>
 #include "Print.h"
 
+typedef int boolean;
+
+extern uint32_t millis();
+
 // compatability macros for testing
 /*
 #define   getInt()            parseInt()

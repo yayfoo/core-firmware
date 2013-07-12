@@ -1,7 +1,7 @@
 ########################################
 #   @author  Spark Application Team    #
 #   @version V1.0.0                    #
-#   @date    20-June-2013              #
+#   @date    12-July-2013              #
 ########################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
@@ -9,6 +9,7 @@ C_SRCS += \
 ../libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
 ../libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c \
 ../libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_bkp.c \
+../libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_crc.c \
 ../libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
 ../libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.c \
 ../libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
@@ -26,6 +27,7 @@ OBJS += \
 ./libraries/STM32F10x_StdPeriph_Driver/src/misc.o \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.o \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_bkp.o \
+./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_crc.o \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.o \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.o \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.o \
@@ -43,6 +45,7 @@ C_DEPS += \
 ./libraries/STM32F10x_StdPeriph_Driver/src/misc.d \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.d \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_bkp.d \
+./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_crc.d \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.d \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.d \
 ./libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.d \

@@ -1,10 +1,16 @@
 ########################################
 #   @author  Spark Application Team    #
 #   @version V1.0.0                    #
-#   @date    20-June-2013              #
+#   @date    12-July-2013              #
 ########################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
+CPP_SRCS += \
+../src/Print.cpp \
+../src/Stream.cpp \
+../src/WString.cpp \
+../src/new.cpp 
+
 C_SRCS += \
 ../src/application.c \
 ../src/cc3000_spi.c \
@@ -22,10 +28,14 @@ C_SRCS += \
 ../src/usb_pwr.c 
 
 OBJS += \
+./src/Print.o \
+./src/Stream.o \
+./src/WString.o \
 ./src/application.o \
 ./src/cc3000_spi.o \
 ./src/hw_config.o \
 ./src/main.o \
+./src/new.o \
 ./src/spark_utilities.o \
 ./src/spark_wiring.o \
 ./src/sst25vf_spi.o \
@@ -53,8 +63,20 @@ C_DEPS += \
 ./src/usb_prop.d \
 ./src/usb_pwr.d 
 
+CPP_DEPS += \
+./src/Print.d \
+./src/Stream.d \
+./src/WString.d \
+./src/new.d 
+
 
 # Each subdirectory must supply rules for building sources it contributes
+src/%.o: ../src/%.cpp
+	@echo 'Building file: $<'
+	arm-none-eabi-g++ -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -I"../libraries/CMSIS/Include" -I"../libraries/CMSIS/Device/ST/STM32F10x/Include" -I"../libraries/STM32F10x_StdPeriph_Driver/inc" -I"../libraries/STM32_USB-FS-Device_Driver/inc" -I"../libraries/CC3000_Host_Driver" -I"../inc" -Os -ffunction-sections -Wall -fno-exceptions -fno-rtti -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -mcpu=cortex-m3 -mthumb -g3 -gdwarf-2 -o "$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	arm-none-eabi-gcc -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -I"../libraries/CMSIS/Include" -I"../libraries/CMSIS/Device/ST/STM32F10x/Include" -I"../libraries/STM32F10x_StdPeriph_Driver/inc" -I"../libraries/STM32_USB-FS-Device_Driver/inc" -I"../libraries/CC3000_Host_Driver" -I"../inc" -Os -ffunction-sections -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -mcpu=cortex-m3 -mthumb -g3 -gdwarf-2 -o "$@" "$<"

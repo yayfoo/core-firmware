@@ -38,3 +38,7 @@ RIDE/*
 
 # backup folder
 backup/*
+
+# Arduino folder (WIP)
+libraries/Arduino/*
+

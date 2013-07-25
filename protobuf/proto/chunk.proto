@@ -1,0 +1,9 @@
+package spark;
+
+//@max_bytes_length=32
+
+message Chunk {
+  optional bytes  crc    = 1;
+  optional uint32 length = 2;
+  optional bytes  data   = 3;
+}

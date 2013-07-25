@@ -1,0 +1,5 @@
+package spark;
+
+message Hello {
+  optional uint32 counter = 1;
+}

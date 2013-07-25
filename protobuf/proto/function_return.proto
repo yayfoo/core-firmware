@@ -1,0 +1,6 @@
+package spark;
+
+message FunctionReturn {
+  optional uint32 counter = 1;
+  // TODO describe return type and value
+}

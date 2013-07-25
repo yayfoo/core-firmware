@@ -1,0 +1,6 @@
+package spark;
+
+message Ignored {
+  optional uint32 counter  = 1;
+  optional uint32 received = 2;
+}

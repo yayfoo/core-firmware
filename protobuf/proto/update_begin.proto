@@ -1,5 +1,0 @@
-package spark;
-
-message UpdateBegin {
-  optional uint32 counter = 1;
-}

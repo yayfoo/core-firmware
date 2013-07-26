@@ -1,0 +1,98 @@
+package spark;
+
+//@max_bytes_length=127
+//@max_string_length=127
+
+message Chunk {
+  optional bytes  crc    = 1;
+  optional uint32 length = 2;
+  optional bytes data   = 3;
+}
+message ChunkReceived {
+  optional uint32 counter = 1;
+  optional bytes  crc     = 2;
+}
+message Event {
+  optional uint32 counter = 1;
+  optional string name    = 2;
+  optional string data    = 3;
+}
+message FunctionCall {
+  optional uint32 counter = 1;
+  // TODO, describe argument and return value types
+}
+message FunctionReturn {
+  optional uint32 counter = 1;
+  // TODO describe return type and value
+}
+
+message Hello {
+  optional uint32 counter = 1;
+}
+message Ignored {
+  optional uint32 counter  = 1;
+  optional uint32 received = 2;
+}
+message KeyChange {
+  optional uint32 counter    = 1;
+  optional bytes  ciphertext = 2; // 256-byte RSA encrypted message as during handshake
+  optional bytes  signature  = 3; // 256-byte RSA signature as during handshake
+}
+message UpdateBegin {
+  optional uint32 counter = 1;
+}
+message UpdateDone {
+  optional uint32 counter = 1;
+}
+message UpdateReady {
+  optional uint32 counter = 1;
+}
+message VariableRequest {
+  optional uint32 counter = 1;
+  // TODO: maybe just name, maybe also types
+}
+message VariableValue {
+  optional uint32 counter = 1;
+  // TODO: maybe just name, maybe also types
+}
+
+
+//if we send all messages in an 'Envelope', and set the type appropriately,
+//we should have minimum overhead, and should be able to easily switch to
+//whatever property / message is set.
+
+enum Type {
+	CHUNK = 1;
+	CHUNKRECEIVED = 2;
+	EVENT = 3;
+	FUNCTIONCALL = 4;
+	FUNCTIONRETURN = 5;
+	HELLO = 6;
+	IGNORED = 7;
+	KEYCHANGE = 8;
+	UPDATEBEGIN = 9;
+	UPDATEDONE = 10;
+	UPDATEREADY = 11;
+	VARIABLEREQUEST = 12;
+	VARIABLEVALUE = 13;
+}
+
+message Envelope {
+
+
+    // Identifies which type of message was sent
+    optional Type type = 1;
+    optional VariableRequest variablerequest = 2;
+    optional VariableValue variablevalue = 3;
+    optional FunctionCall functioncall = 4;
+    optional FunctionReturn functionreturn = 5;
+    optional Event event = 6;
+    optional Ignored ignored = 7;
+    optional UpdateBegin updatebegin = 8;
+    optional UpdateReady updateready = 9;
+    optional Chunk chunk = 10;
+    optional ChunkReceived chunkreceived = 11;
+    optional UpdateDone updatedone = 12;
+    optional Hello hello = 13;
+    optional KeyChange keychange = 14;
+}

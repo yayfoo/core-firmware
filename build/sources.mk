@@ -28,9 +28,9 @@ C_UPPER_DEPS :=
 SUBDIRS := \
 startup \
 src \
-protobuf/api \
 libraries/Tropicssl/library \
 libraries/STM32_USB-FS-Device_Driver/src \
 libraries/STM32F10x_StdPeriph_Driver/src \
+libraries/Protobuf \
 libraries/CC3000_Host_Driver \
 

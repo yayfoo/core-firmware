@@ -1,9 +1,0 @@
-package spark;
-
-//@max_string_length=32
-
-message Event {
-  optional uint32 counter = 1;
-  optional string name    = 2;
-  optional string data    = 3;
-}

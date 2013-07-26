@@ -1,6 +1,0 @@
-package spark;
-
-message VariableRequest {
-  optional uint32 counter = 1;
-  // TODO: maybe just name, maybe also types
-}

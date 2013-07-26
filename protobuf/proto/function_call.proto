@@ -1,6 +1,0 @@
-package spark;
-
-message FunctionCall {
-  optional uint32 counter = 1;
-  // TODO, describe argument and return value types
-}

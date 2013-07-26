@@ -1,8 +1,0 @@
-package spark;
-
-//@max_bytes_length=32
-
-message ChunkReceived {
-  optional uint32 counter = 1;
-  optional bytes  crc     = 2;
-}

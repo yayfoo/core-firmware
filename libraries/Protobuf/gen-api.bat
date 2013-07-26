@@ -1,0 +1,1 @@
+java -jar protoc-1.0M4.jar spark.proto

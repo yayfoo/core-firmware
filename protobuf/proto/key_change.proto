@@ -1,9 +1,0 @@
-package spark;
-
-//@max_bytes_length=32
-
-message KeyChange {
-  optional uint32 counter    = 1;
-  optional bytes  ciphertext = 2; // 256-byte RSA encrypted message as during handshake
-  optional bytes  signature  = 3; // 256-byte RSA signature as during handshake
-}

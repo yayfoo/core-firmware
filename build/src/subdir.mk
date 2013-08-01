@@ -1,3 +1,6 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
@@ -5,6 +8,7 @@ C_SRCS += \
 ../src/cc3000_spi.c \
 ../src/hw_config.c \
 ../src/main.c \
+../src/spark_crypto.c \
 ../src/spark_utilities.c \
 ../src/spark_wiring.c \
 ../src/sst25vf_spi.c \
@@ -21,6 +25,7 @@ OBJS += \
 ./src/cc3000_spi.o \
 ./src/hw_config.o \
 ./src/main.o \
+./src/spark_crypto.o \
 ./src/spark_utilities.o \
 ./src/spark_wiring.o \
 ./src/sst25vf_spi.o \
@@ -37,6 +42,7 @@ C_DEPS += \
 ./src/cc3000_spi.d \
 ./src/hw_config.d \
 ./src/main.d \
+./src/spark_crypto.d \
 ./src/spark_utilities.d \
 ./src/spark_wiring.d \
 ./src/sst25vf_spi.d \

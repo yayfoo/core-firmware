@@ -16,7 +16,7 @@
 #include "spark_utilities.h"
 #include "spark_crypto.h"
 #include <errno.h>
-#include <sys/stat.h>
+#include <sys/types.h>
 
 /* Private typedef -----------------------------------------------------------*/
 

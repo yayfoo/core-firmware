@@ -1,3 +1,6 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
@@ -14,6 +17,7 @@ C_SRCS += \
 ../libraries/Tropicssl/library/md2.c \
 ../libraries/Tropicssl/library/md4.c \
 ../libraries/Tropicssl/library/md5.c \
+../libraries/Tropicssl/library/net.c \
 ../libraries/Tropicssl/library/padlock.c \
 ../libraries/Tropicssl/library/rsa.c \
 ../libraries/Tropicssl/library/sha1.c \
@@ -40,6 +44,7 @@ OBJS += \
 ./libraries/Tropicssl/library/md2.o \
 ./libraries/Tropicssl/library/md4.o \
 ./libraries/Tropicssl/library/md5.o \
+./libraries/Tropicssl/library/net.o \
 ./libraries/Tropicssl/library/padlock.o \
 ./libraries/Tropicssl/library/rsa.o \
 ./libraries/Tropicssl/library/sha1.o \
@@ -66,6 +71,7 @@ C_DEPS += \
 ./libraries/Tropicssl/library/md2.d \
 ./libraries/Tropicssl/library/md4.d \
 ./libraries/Tropicssl/library/md5.d \
+./libraries/Tropicssl/library/net.d \
 ./libraries/Tropicssl/library/padlock.d \
 ./libraries/Tropicssl/library/rsa.d \
 ./libraries/Tropicssl/library/sha1.d \

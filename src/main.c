@@ -14,6 +14,9 @@
 #include "usb_pwr.h"
 #include "sst25vf_spi.h"
 #include "spark_utilities.h"
+#include "spark_crypto.h"
+#include <errno.h>
+#include <sys/stat.h>
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -31,7 +34,7 @@ __IO uint32_t TimingSparkProcessAPI;
 __IO uint32_t TimingSparkAliveTimeout;
 __IO uint32_t TimingSparkResetTimeout;
 
-uint8_t WLAN_MANUAL_CONNECT = 0;//For Manual connection, set this to 1
+uint8_t WLAN_MANUAL_CONNECT = 1;//For Manual connection, set this to 1
 uint8_t WLAN_SMART_CONFIG_START;
 uint8_t WLAN_SMART_CONFIG_STOP;
 uint8_t WLAN_SMART_CONFIG_FINISHED;
@@ -75,6 +78,15 @@ char device_name[] = "CC3000";
 int main(void)
 {
 	Set_System();
+
+	if(rsa_test() != 0)
+	{
+		//Failed
+	}
+	else
+	{
+		//Passed
+	}
 
 #ifdef IWDG_RESET_ENABLE
 	/* Check if the system has resumed from IWDG reset */
@@ -169,7 +181,8 @@ int main(void)
 		else if (WLAN_MANUAL_CONNECT && !WLAN_DHCP)
 		{
 		    wlan_ioctl_set_connection_policy(DISABLE, DISABLE, DISABLE);
-		    wlan_connect(WLAN_SEC_WPA2, "ssid", 4, NULL, "password", 8);
+		    //wlan_connect(WLAN_SEC_WPA2, "ssid", 4, NULL, "password", 8);
+		    wlan_connect(WLAN_SEC_WPA2, "VED", 3, NULL, "BD180408", 8);
 		    WLAN_MANUAL_CONNECT = 0;
 		}
 
@@ -594,6 +607,34 @@ void Start_OTA_Update(void)
 	BKP_WriteBackupRegister(BKP_DR10, 0x5000);
 
 	NVIC_SystemReset();
+}
+
+/*
+ sbrk
+ Increase program data space.
+ Malloc and related functions depend on this
+ */
+caddr_t _sbrk(int incr)
+{
+	extern char _ebss; // Defined by the linker
+	static char *heap_end;
+	char *prev_heap_end;
+
+	if (heap_end == 0) {
+		heap_end = &_ebss;
+	}
+	prev_heap_end = heap_end;
+
+	char * stack = (char*) __get_MSP();
+	if (heap_end + incr >  stack)
+	{
+		errno = ENOMEM;
+		return  (caddr_t) -1;
+		//abort ();
+	}
+
+	heap_end += incr;
+	return (caddr_t) prev_heap_end;
 }
 
 #ifdef USE_FULL_ASSERT

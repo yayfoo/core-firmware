@@ -37,6 +37,7 @@
 
 #include <time.h>
 
+#include "tropicssl/net.h"
 #include "tropicssl/dhm.h"
 #include "tropicssl/rsa.h"
 #include "tropicssl/md5.h"

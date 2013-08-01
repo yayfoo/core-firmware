@@ -221,7 +221,7 @@
  *
  * This module provides TCP/IP networking routines.
  */
-#define TROPICSSL_NET_C
+//#define TROPICSSL_NET_C
 
 /*
  * Module:  library/padlock.c

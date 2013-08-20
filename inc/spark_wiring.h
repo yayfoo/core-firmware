@@ -9,6 +9,7 @@
 #define SPARK_WIRING_H_
 
 #include "stm32f10x.h"
+#include <stdarg.h>
 
 /*
  * Basic variables
@@ -152,5 +153,11 @@ extern Serial_Interface Serial;
  * Serial1
  */
 extern Serial_Interface Serial1;
+
+//typedef struct Spark_Namespace {
+//	void (*function)(void (*funcPtr)(int, ...), int, ...);
+//} Spark_Namespace;
+//
+//extern Spark_Namespace Spark;
 
 #endif /* SPARK_WIRING_H_ */

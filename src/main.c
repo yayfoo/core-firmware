@@ -31,6 +31,9 @@ __IO uint32_t TimingSparkProcessAPI;
 __IO uint32_t TimingSparkAliveTimeout;
 __IO uint32_t TimingSparkResetTimeout;
 
+__IO uint8_t LED_RGB_TOGGLE;
+__IO uint8_t LED_RGB_FADE;
+
 uint8_t WLAN_MANUAL_CONNECT = 0;//For Manual connection, set this to 1
 uint8_t WLAN_SMART_CONFIG_START;
 uint8_t WLAN_SMART_CONFIG_STOP;
@@ -43,7 +46,6 @@ __IO uint8_t SPARK_SOCKET_CONNECTED;
 __IO uint8_t SPARK_SOCKET_ALIVE;
 __IO uint8_t SPARK_DEVICE_ACKED;
 __IO uint8_t SPARK_DEVICE_IWDGRST;
-__IO uint8_t SPARK_LED_FADE;
 
 __IO uint8_t Socket_Connect_Count;
 
@@ -179,6 +181,21 @@ int main(void)
 	}
 #endif
 
+#if defined (USE_SPARK_CORE_V02)
+	if(!WLAN_MANUAL_CONNECT || WLAN_SMART_CONFIG_START)
+	{
+		LED_SetRGBColor(RGB_COLOR_BLUE);
+		LED_On(LED_RGB);
+	}
+	else
+	{
+		LED_SetRGBColor(RGB_COLOR_GREEN);
+		LED_On(LED_RGB);
+	}
+
+	LED_RGB_TOGGLE = 1;
+#endif
+
 	/* Main loop */
 	while (1)
 	{
@@ -216,6 +233,10 @@ int main(void)
 
 		if(WLAN_DHCP && !SPARK_SOCKET_CONNECTED)
 		{
+    		LED_SetRGBColor(RGB_COLOR_CYAN);
+    		LED_On(LED_RGB);
+    		LED_RGB_TOGGLE = 1;
+
 			Socket_Connect_Count++;
 
 			if(Spark_Connect() < 0)
@@ -280,7 +301,7 @@ void Timing_Decrement(void)
     {
         TimingLED--;
     }
-    else if(SPARK_LED_FADE)
+    else if(LED_RGB_FADE)
     {
 #if defined (USE_SPARK_CORE_V02)
     	LED_Fade(LED_RGB);
@@ -292,7 +313,8 @@ void Timing_Decrement(void)
 #if defined (USE_SPARK_CORE_V01)
     	LED_Toggle(LED1);
 #elif defined (USE_SPARK_CORE_V02)
-		//Do nothing
+    	if(LED_RGB_TOGGLE)
+    		LED_Toggle(LED_RGB);
 #endif
     	TimingLED = 100;	//100ms
     }
@@ -304,9 +326,8 @@ void Timing_Decrement(void)
 #if defined (USE_SPARK_CORE_V01)
     		LED_On(LED1);//SPARK_DEVICE_ACKED
 #elif defined (USE_SPARK_CORE_V02)
-    		LED_SetRGBColor(RGB_COLOR_CYAN);
-    		LED_On(LED_RGB);
-    		SPARK_LED_FADE = 1;
+    		LED_RGB_TOGGLE = 0;
+    		LED_RGB_FADE = 1;
 #endif
     		SparkDeviceAckedLedOn = 1;
     	}
@@ -526,26 +547,20 @@ void Start_Smart_Config(void)
 	/* Start the SmartConfig start process */
 	wlan_smart_config_start(1);
 
-#if defined (USE_SPARK_CORE_V02)
-    LED_SetRGBColor(RGB_COLOR_BLUE);
-	LED_On(LED_RGB);
-#endif
-
 	/* Wait for SmartConfig to finish */
 	while (WLAN_SMART_CONFIG_FINISHED == 0)
 	{
 #if defined (USE_SPARK_CORE_V01)
 		/* Toggle the LED2 every 100ms */
 		LED_Toggle(LED2);
-#elif defined (USE_SPARK_CORE_V02)
-		LED_Toggle(LED_RGB);
-#endif
 		Delay(100);
+#endif
 	}
 
 #if defined (USE_SPARK_CORE_V01)
 	LED_Off(LED2);
 #elif defined (USE_SPARK_CORE_V02)
+	LED_RGB_TOGGLE = 0;
 	LED_On(LED_RGB);
 #endif
 
@@ -581,10 +596,10 @@ void Start_Smart_Config(void)
 #endif
 	}
 
+	WLAN_SMART_CONFIG_START = 0;
+
 	/* Reset the CC3000 */
 	wlan_stop();
-
-	WLAN_SMART_CONFIG_START = 0;
 
 	Delay(100);
 
@@ -592,6 +607,10 @@ void Start_Smart_Config(void)
 
 	/* Mask out all non-required events */
 	wlan_set_event_mask(HCI_EVNT_WLAN_KEEPALIVE | HCI_EVNT_WLAN_UNSOL_INIT | HCI_EVNT_WLAN_ASYNC_PING_REPORT);
+
+	LED_SetRGBColor(RGB_COLOR_GREEN);
+	LED_On(LED_RGB);
+	LED_RGB_TOGGLE = 1;
 }
 
 /* WLAN Application related callbacks passed to wlan_init */
@@ -606,6 +625,7 @@ void WLAN_Async_Callback(long lEventType, char *data, unsigned char length)
 			break;
 
 		case HCI_EVNT_WLAN_UNSOL_CONNECT:
+			LED_RGB_TOGGLE = 0;
 			WLAN_CONNECTED = 1;
 			break;
 
@@ -635,7 +655,8 @@ void WLAN_Async_Callback(long lEventType, char *data, unsigned char length)
 			SPARK_SOCKET_CONNECTED = 0;
 			SPARK_SOCKET_ALIVE = 0;
 			SPARK_DEVICE_ACKED = 0;
-			SPARK_LED_FADE = 0;
+			LED_RGB_TOGGLE = 1;
+			LED_RGB_FADE = 0;
 			Socket_Connect_Count = 0;
 			break;
 

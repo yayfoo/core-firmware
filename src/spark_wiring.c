@@ -100,6 +100,13 @@ Serial_Interface Serial1 =
 	serial1_println
 };
 
+//void spark_function(void (*funcPtr)(int n_args, ...), int n_args, ...);
+//
+//Spark_Namespace Spark =
+//{
+//	spark_function
+//};
+
 /*
  * @brief Set the mode of the pin to OUTPUT, INPUT, INPUT_PULLUP, or INPUT_PULLDOWN
  */
@@ -624,3 +631,15 @@ void serial1_println(const char * str)
 	serial1_print("\r\n");
 }
 
+//void spark_function(void (*funcPtr)(int n_args, ...), int num, ...)
+//{
+//	va_list arguments;	// A place to store the list of arguments
+//	int i;
+//
+//	va_start (arguments, num);	// Initializing arguments to store all values after num
+//
+//	for (i = 0; i < num; i++)	// Loop until all numbers are added
+//		va_arg (arguments, double);	// Use the next value in argument list
+//
+//	va_end (arguments);	// Cleans up the list
+//}

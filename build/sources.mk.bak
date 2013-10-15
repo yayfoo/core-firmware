@@ -28,7 +28,4 @@ C_UPPER_DEPS :=
 SUBDIRS := \
 startup \
 src \
-FreeRTOS_Source \
-FreeRTOS_Source/portable/MemMang \
-FreeRTOS_Source/portable/GCC/ARM_CM3 \
 

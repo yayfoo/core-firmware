@@ -2,12 +2,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/application.cpp \
+../src/heap_1.cpp \
+../src/list.cpp \
 ../src/main.cpp \
 ../src/newlib_stubs.cpp \
+../src/port.cpp \
+../src/queue.cpp \
 ../src/spark_utilities.cpp \
 ../src/spark_wiring.cpp \
 ../src/spark_wlan.cpp \
 ../src/stm32_it.cpp \
+../src/tasks.cpp \
+../src/timers.cpp \
 ../src/usb_desc.cpp \
 ../src/usb_endp.cpp \
 ../src/usb_istr.cpp \
@@ -15,12 +21,18 @@ CPP_SRCS += \
 
 OBJS += \
 ./src/application.o \
+./src/heap_1.o \
+./src/list.o \
 ./src/main.o \
 ./src/newlib_stubs.o \
+./src/port.o \
+./src/queue.o \
 ./src/spark_utilities.o \
 ./src/spark_wiring.o \
 ./src/spark_wlan.o \
 ./src/stm32_it.o \
+./src/tasks.o \
+./src/timers.o \
 ./src/usb_desc.o \
 ./src/usb_endp.o \
 ./src/usb_istr.o \
@@ -28,12 +40,18 @@ OBJS += \
 
 CPP_DEPS += \
 ./src/application.d \
+./src/heap_1.d \
+./src/list.d \
 ./src/main.d \
 ./src/newlib_stubs.d \
+./src/port.d \
+./src/queue.d \
 ./src/spark_utilities.d \
 ./src/spark_wiring.d \
 ./src/spark_wlan.d \
 ./src/stm32_it.d \
+./src/tasks.d \
+./src/timers.d \
 ./src/usb_desc.d \
 ./src/usb_endp.d \
 ./src/usb_istr.d \

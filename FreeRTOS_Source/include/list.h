@@ -249,7 +249,7 @@ xList * const pxConstList = ( pxList );														\
 	{																						\
 		( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;						\
 	}																						\
-	( pxTCB ) = (tskTCB*)( pxConstList )->pxIndex->pvOwner;									\
+	( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;											\
 }
 
 

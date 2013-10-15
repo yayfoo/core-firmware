@@ -62,6 +62,15 @@
     1 tab == 4 spaces!
 */
 
+
+/* The following #error directive is to remind users that a batch file must be
+ * executed prior to this project being built.  The batch file *cannot* be 
+ * executed from within CCS4!  Once it has been executed, re-open or refresh 
+ * the CCS4 project and remove the #error line below.
+ */
+//#error Ensure CreateProjectDirectoryStructure.bat has been executed before building.  See comment immediately above.
+
+
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
@@ -99,7 +108,7 @@
 #define configUSE_COUNTING_SEMAPHORES	0
 
 /* Co-routine definitions. */
-#define configUSE_CO_ROUTINES 		0
+#define configUSE_CO_ROUTINES 			0
 #define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 
 /* Software timer definitions. */
@@ -120,9 +129,9 @@ to exclude the API function. */
 
 /* Use the system definition, if there is one */
 #ifdef __NVIC_PRIO_BITS
-	#define configPRIO_BITS       __NVIC_PRIO_BITS
+	#define configPRIO_BITS       		__NVIC_PRIO_BITS
 #else
-	#define configPRIO_BITS       4        /* 15 priority levels */
+	#define configPRIO_BITS       		4        /* 15 priority levels */
 #endif
 
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY			15

@@ -26,6 +26,7 @@
 
 /* Extern variables ----------------------------------------------------------*/
 extern __IO uint16_t BUTTON_DEBOUNCED_TIME[];
+extern xTimerHandle xLEDTimer;
 
 /* Private function prototypes -----------------------------------------------*/
 void USER_EXTI_Line_Handler(uint8_t EXTI_Line_Number) __attribute__ ((weak));
@@ -114,9 +115,11 @@ void UsageFault_Handler(void)
  * Output         : None
  * Return         : None
  *******************************************************************************/
+/*
 void SVC_Handler(void)
 {
 }
+ */
 
 /*******************************************************************************
  * Function Name  : DebugMon_Handler
@@ -136,9 +139,11 @@ void DebugMon_Handler(void)
  * Output         : None
  * Return         : None
  *******************************************************************************/
+/*
 void PendSV_Handler(void)
 {
 }
+ */
 
 /*******************************************************************************
  * Function Name  : SysTick_Handler
@@ -147,10 +152,12 @@ void PendSV_Handler(void)
  * Output         : None
  * Return         : None
  *******************************************************************************/
+/*
 void SysTick_Handler(void)
 {
 	Timing_Decrement();
 }
+ */
 
 /******************************************************************************/
 /*                 STM32 Peripherals Interrupt Handlers                   */
@@ -171,22 +178,22 @@ void RTC_IRQHandler(void)
 {
 	if(RTC_GetITStatus(RTC_IT_SEC) != RESET)
 	{
-//		/* If counter is equal to 86339: one day was elapsed */
-//		if((RTC_GetCounter() / 3600 == 23)
-//				&& (((RTC_GetCounter() % 3600) / 60) == 59)
-//				&& (((RTC_GetCounter() % 3600) % 60) == 59)) /* 23*3600 + 59*60 + 59 = 86339 */
-//		{
-//			/* Wait until last write operation on RTC registers has finished */
-//			RTC_WaitForLastTask();
-//
-//			/* Reset counter value */
-//			RTC_SetCounter(0x0);
-//
-//			/* Wait until last write operation on RTC registers has finished */
-//			RTC_WaitForLastTask();
-//
-//			/* Increment no_of_days_elapsed variable here */
-//		}
+		//		/* If counter is equal to 86339: one day was elapsed */
+		//		if((RTC_GetCounter() / 3600 == 23)
+		//				&& (((RTC_GetCounter() % 3600) / 60) == 59)
+		//				&& (((RTC_GetCounter() % 3600) % 60) == 59)) /* 23*3600 + 59*60 + 59 = 86339 */
+		//		{
+		//			/* Wait until last write operation on RTC registers has finished */
+		//			RTC_WaitForLastTask();
+		//
+		//			/* Reset counter value */
+		//			RTC_SetCounter(0x0);
+		//
+		//			/* Wait until last write operation on RTC registers has finished */
+		//			RTC_WaitForLastTask();
+		//
+		//			/* Increment no_of_days_elapsed variable here */
+		//		}
 
 		/* Clear the RTC Second Interrupt pending bit */
 		RTC_ClearITPendingBit(RTC_IT_SEC);
@@ -197,12 +204,12 @@ void RTC_IRQHandler(void)
 }
 
 /*******************************************************************************
-* Function Name  : RTCAlarm_IRQHandler
-* Description    : This function handles RTC Alarm interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+ * Function Name  : RTCAlarm_IRQHandler
+ * Description    : This function handles RTC Alarm interrupt request.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
 	if(RTC_GetITStatus(RTC_IT_ALR) != RESET)
@@ -285,16 +292,39 @@ void EXTI2_IRQHandler(void)
 #if defined (USE_SPARK_CORE_V02)
 	if (EXTI_GetITStatus(EXTI_Line2) != RESET)//BUTTON1_EXTI_LINE
 	{
-		/* Clear the EXTI line pending bit */
-		EXTI_ClearITPendingBit(EXTI_Line2);//BUTTON1_EXTI_LINE
+		//		/* Clear the EXTI line pending bit */
+		//		EXTI_ClearITPendingBit(EXTI_Line2);//BUTTON1_EXTI_LINE
+		//
+		//		BUTTON_DEBOUNCED_TIME[BUTTON1] = 0x00;
+		//
+		//		/* Disable BUTTON1 Interrupt */
+		//		BUTTON_EXTI_Config(BUTTON1, DISABLE);
+		//
+		//		/* Enable TIM1 CC4 Interrupt */
+		//		TIM_ITConfig(TIM1, TIM_IT_CC4, ENABLE);
 
-		BUTTON_DEBOUNCED_TIME[BUTTON1] = 0x00;
+		portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-		/* Disable BUTTON1 Interrupt */
-		BUTTON_EXTI_Config(BUTTON1, DISABLE);
+		/* The button was pushed, set the RGB LED to RED color
+			The LED timer will reset the RGB LED to its default color
+			if the button is not pushed within 5000ms. */
+		LED_SetRGBColor(RGB_COLOR_CYAN);
+		LED_On(LED_RGB);
 
-		/* Enable TIM1 CC4 Interrupt */
-		TIM_ITConfig(TIM1, TIM_IT_CC4, ENABLE);
+		/* This interrupt safe FreeRTOS function can be called from this interrupt
+			because the interrupt priority is below the
+			configMAX_SYSCALL_INTERRUPT_PRIORITY setting in FreeRTOSConfig.h. */
+		xTimerResetFromISR( xLEDTimer, &xHigherPriorityTaskWoken );
+
+		/* Clear the interrupt before leaving. */
+		EXTI_ClearITPendingBit( EXTI_Line2 );
+
+		/* If calling xTimerResetFromISR() caused a task (in this case the timer
+			service/daemon task) to unblock, and the unblocked task has a priority
+			higher than or equal to the task that was interrupted, then
+			xHigherPriorityTaskWoken will now be set to pdTRUE, and calling
+			portEND_SWITCHING_ISR() will ensure the unblocked task runs next. */
+		portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
 	}
 #endif
 }
@@ -439,19 +469,19 @@ void EXTI15_10_IRQHandler(void)
 	}
 
 #if defined (USE_SPARK_CORE_V01)
-	if (EXTI_GetITStatus(EXTI_Line10) != RESET)//BUTTON1_EXTI_LINE
-	{
-		/* Clear the EXTI line pending bit */
-		EXTI_ClearITPendingBit(EXTI_Line10);//BUTTON1_EXTI_LINE
-
-		BUTTON_DEBOUNCED_TIME[BUTTON1] = 0x00;
-
-		/* Disable BUTTON1 Interrupt */
-		BUTTON_EXTI_Config(BUTTON1, DISABLE);
-
-		/* Enable TIM1 CC4 Interrupt */
-		TIM_ITConfig(TIM1, TIM_IT_CC4, ENABLE);
-	}
+	//	if (EXTI_GetITStatus(EXTI_Line10) != RESET)//BUTTON1_EXTI_LINE
+	//	{
+	//		/* Clear the EXTI line pending bit */
+	//		EXTI_ClearITPendingBit(EXTI_Line10);//BUTTON1_EXTI_LINE
+	//
+	//		BUTTON_DEBOUNCED_TIME[BUTTON1] = 0x00;
+	//
+	//		/* Disable BUTTON1 Interrupt */
+	//		BUTTON_EXTI_Config(BUTTON1, DISABLE);
+	//
+	//		/* Enable TIM1 CC4 Interrupt */
+	//		TIM_ITConfig(TIM1, TIM_IT_CC4, ENABLE);
+	//	}
 #endif
 }
 
@@ -464,23 +494,23 @@ void EXTI15_10_IRQHandler(void)
  *******************************************************************************/
 void TIM1_CC_IRQHandler(void)
 {
-	if (TIM_GetITStatus(TIM1, TIM_IT_CC4) != RESET)
-	{
-		TIM_ClearITPendingBit(TIM1, TIM_IT_CC4);
-
-		if (BUTTON_GetState(BUTTON1) == BUTTON1_PRESSED)
-		{
-			BUTTON_DEBOUNCED_TIME[BUTTON1] += BUTTON_DEBOUNCE_INTERVAL;
-		}
-		else
-		{
-			/* Disable TIM1 CC4 Interrupt */
-			TIM_ITConfig(TIM1, TIM_IT_CC4, DISABLE);
-
-			/* Enable BUTTON1 Interrupt */
-			BUTTON_EXTI_Config(BUTTON1, ENABLE);
-		}
-	}
+	//	if (TIM_GetITStatus(TIM1, TIM_IT_CC4) != RESET)
+	//	{
+	//		TIM_ClearITPendingBit(TIM1, TIM_IT_CC4);
+	//
+	//		if (BUTTON_GetState(BUTTON1) == BUTTON1_PRESSED)
+	//		{
+	//			BUTTON_DEBOUNCED_TIME[BUTTON1] += BUTTON_DEBOUNCE_INTERVAL;
+	//		}
+	//		else
+	//		{
+	//			/* Disable TIM1 CC4 Interrupt */
+	//			TIM_ITConfig(TIM1, TIM_IT_CC4, DISABLE);
+	//
+	//			/* Enable BUTTON1 Interrupt */
+	//			BUTTON_EXTI_Config(BUTTON1, ENABLE);
+	//		}
+	//	}
 }
 
 /*******************************************************************************
@@ -496,13 +526,13 @@ void DMA1_Channel5_IRQHandler(void)
 }
 
 /*******************************************************************************
-* Function Name  : USB_LP_CAN1_RX0_IRQHandler
-* Description    : This function handles USB Low Priority interrupts
-*                  requests.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+ * Function Name  : USB_LP_CAN1_RX0_IRQHandler
+ * Description    : This function handles USB Low Priority interrupts
+ *                  requests.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
 	USB_Istr();

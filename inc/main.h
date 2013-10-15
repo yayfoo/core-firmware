@@ -18,6 +18,11 @@ extern "C" {
 
 #include "hw_config.h"
 #include "spark_wlan.h"
+/* FreeRTOS Kernel includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
 
 /* Exported types ------------------------------------------------------------*/
 

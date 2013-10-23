@@ -29,7 +29,12 @@ extern __IO uint16_t BUTTON_DEBOUNCED_TIME[];
 extern xTimerHandle xLEDTimer;
 
 /* Private function prototypes -----------------------------------------------*/
-void USER_EXTI_Line_Handler(uint8_t EXTI_Line_Number) __attribute__ ((weak));
+void Wiring_ADC1_2_Interrupt_Handler(void) __attribute__ ((weak));
+void Wiring_USART2_Interrupt_Handler(void) __attribute__ ((weak));
+void Wiring_I2C1_EV_Interrupt_Handler(void) __attribute__ ((weak));
+void Wiring_I2C1_ER_Interrupt_Handler(void) __attribute__ ((weak));
+void Wiring_SPI1_Interrupt_Handler(void) __attribute__ ((weak));
+void Wiring_EXTI_Interrupt_Handler(uint8_t EXTI_Line_Number) __attribute__ ((weak));
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -166,77 +171,80 @@ void SysTick_Handler(void)
 /*  file (startup_stm32xxx.S).                                            */
 /******************************************************************************/
 
-#if defined (USE_SPARK_CORE_V02)
 /*******************************************************************************
- * Function Name  : RTC_IRQHandler
- * Description    : This function handles RTC global interrupt request.
+ * Function Name  : ADC1_2_IRQHandler
+ * Description    : This function handles ADC1 and ADC2 global interrupts requests.
  * Input          : None
  * Output         : None
  * Return         : None
  *******************************************************************************/
-void RTC_IRQHandler(void)
+void ADC1_2_IRQHandler(void)
 {
-	if(RTC_GetITStatus(RTC_IT_SEC) != RESET)
+	if(NULL != Wiring_ADC1_2_Interrupt_Handler)
 	{
-		//		/* If counter is equal to 86339: one day was elapsed */
-		//		if((RTC_GetCounter() / 3600 == 23)
-		//				&& (((RTC_GetCounter() % 3600) / 60) == 59)
-		//				&& (((RTC_GetCounter() % 3600) % 60) == 59)) /* 23*3600 + 59*60 + 59 = 86339 */
-		//		{
-		//			/* Wait until last write operation on RTC registers has finished */
-		//			RTC_WaitForLastTask();
-		//
-		//			/* Reset counter value */
-		//			RTC_SetCounter(0x0);
-		//
-		//			/* Wait until last write operation on RTC registers has finished */
-		//			RTC_WaitForLastTask();
-		//
-		//			/* Increment no_of_days_elapsed variable here */
-		//		}
-
-		/* Clear the RTC Second Interrupt pending bit */
-		RTC_ClearITPendingBit(RTC_IT_SEC);
-
-		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
+		Wiring_ADC1_2_Interrupt_Handler();
 	}
 }
 
 /*******************************************************************************
- * Function Name  : RTCAlarm_IRQHandler
- * Description    : This function handles RTC Alarm interrupt request.
+ * Function Name  : USART2_IRQHandler
+ * Description    : This function handles USART2 global interrupt request.
  * Input          : None
  * Output         : None
  * Return         : None
  *******************************************************************************/
-void RTCAlarm_IRQHandler(void)
+void USART2_IRQHandler(void)
 {
-	if(RTC_GetITStatus(RTC_IT_ALR) != RESET)
+	if(NULL != Wiring_USART2_Interrupt_Handler)
 	{
-		SPARK_WLAN_SLEEP = 0;
-
-		/* Clear EXTI line17 pending bit */
-		EXTI_ClearITPendingBit(EXTI_Line17);
-
-		/* Check if the Wake-Up flag is set */
-		if(PWR_GetFlagStatus(PWR_FLAG_WU) != RESET)
-		{
-			/* Clear Wake Up flag */
-			PWR_ClearFlag(PWR_FLAG_WU);
-		}
-
-		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
-
-		/* Clear RTC Alarm interrupt pending bit */
-		RTC_ClearITPendingBit(RTC_IT_ALR);
-
-		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
+		Wiring_USART2_Interrupt_Handler();
 	}
 }
-#endif
+
+/*******************************************************************************
+ * Function Name  : I2C1_EV_IRQHandler
+ * Description    : This function handles I2C1 Event interrupt request.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
+void I2C1_EV_IRQHandler(void)
+{
+	if(NULL != Wiring_I2C1_EV_Interrupt_Handler)
+	{
+		Wiring_I2C1_EV_Interrupt_Handler();
+	}
+}
+
+/*******************************************************************************
+ * Function Name  : I2C1_ER_IRQHandler
+ * Description    : This function handles I2C1 Error interrupt request.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
+void I2C1_ER_IRQHandler(void)
+{
+	if(NULL != Wiring_I2C1_ER_Interrupt_Handler)
+	{
+		Wiring_I2C1_ER_Interrupt_Handler();
+	}
+}
+
+/*******************************************************************************
+ * Function Name  : SPI1_IRQHandler
+ * Description    : This function handles SPI1 global interrupt request.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
+void SPI1_IRQHandler(void)
+{
+	if(NULL != Wiring_SPI1_Interrupt_Handler)
+	{
+		Wiring_SPI1_Interrupt_Handler();
+	}
+}
 
 /*******************************************************************************
  * Function Name  : EXTI0_IRQHandler
@@ -252,9 +260,9 @@ void EXTI0_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line0);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(0);
+			Wiring_EXTI_Interrupt_Handler(0);
 		}
 	}
 }
@@ -273,9 +281,9 @@ void EXTI1_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line1);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(1);
+			Wiring_EXTI_Interrupt_Handler(1);
 		}
 	}
 }
@@ -343,9 +351,9 @@ void EXTI3_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line3);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(3);
+			Wiring_EXTI_Interrupt_Handler(3);
 		}
 	}
 }
@@ -364,9 +372,9 @@ void EXTI4_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line4);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(4);
+			Wiring_EXTI_Interrupt_Handler(4);
 		}
 	}
 }
@@ -387,9 +395,9 @@ void EXTI9_5_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line5);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(5);
+			Wiring_EXTI_Interrupt_Handler(5);
 		}
 	}
 
@@ -398,9 +406,9 @@ void EXTI9_5_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line6);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(6);
+			Wiring_EXTI_Interrupt_Handler(6);
 		}
 	}
 
@@ -409,9 +417,9 @@ void EXTI9_5_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line7);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(7);
+			Wiring_EXTI_Interrupt_Handler(7);
 		}
 	}
 }
@@ -432,9 +440,9 @@ void EXTI15_10_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line13);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(13);
+			Wiring_EXTI_Interrupt_Handler(13);
 		}
 	}
 
@@ -443,9 +451,9 @@ void EXTI15_10_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line14);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(14);
+			Wiring_EXTI_Interrupt_Handler(14);
 		}
 	}
 
@@ -454,9 +462,9 @@ void EXTI15_10_IRQHandler(void)
 		/* Clear the EXTI line pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line15);
 
-		if(NULL != USER_EXTI_Line_Handler)
+		if(NULL != Wiring_EXTI_Interrupt_Handler)
 		{
-			USER_EXTI_Line_Handler(15);
+			Wiring_EXTI_Interrupt_Handler(15);
 		}
 	}
 
@@ -513,6 +521,78 @@ void TIM1_CC_IRQHandler(void)
 	//	}
 }
 
+#if defined (USE_SPARK_CORE_V02)
+/*******************************************************************************
+ * Function Name  : RTC_IRQHandler
+ * Description    : This function handles RTC global interrupt request.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
+void RTC_IRQHandler(void)
+{
+	if(RTC_GetITStatus(RTC_IT_SEC) != RESET)
+	{
+//		/* If counter is equal to 86339: one day was elapsed */
+//		if((RTC_GetCounter() / 3600 == 23)
+//				&& (((RTC_GetCounter() % 3600) / 60) == 59)
+//				&& (((RTC_GetCounter() % 3600) % 60) == 59)) /* 23*3600 + 59*60 + 59 = 86339 */
+//		{
+//			/* Wait until last write operation on RTC registers has finished */
+//			RTC_WaitForLastTask();
+//
+//			/* Reset counter value */
+//			RTC_SetCounter(0x0);
+//
+//			/* Wait until last write operation on RTC registers has finished */
+//			RTC_WaitForLastTask();
+//
+//			/* Increment no_of_days_elapsed variable here */
+//		}
+
+		/* Clear the RTC Second Interrupt pending bit */
+		RTC_ClearITPendingBit(RTC_IT_SEC);
+
+		/* Wait until last write operation on RTC registers has finished */
+		RTC_WaitForLastTask();
+	}
+}
+
+/*******************************************************************************
+* Function Name  : RTCAlarm_IRQHandler
+* Description    : This function handles RTC Alarm interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void RTCAlarm_IRQHandler(void)
+{
+	if(RTC_GetITStatus(RTC_IT_ALR) != RESET)
+	{
+		SPARK_WLAN_SLEEP = 0;
+
+		/* Clear EXTI line17 pending bit */
+		EXTI_ClearITPendingBit(EXTI_Line17);
+
+		/* Check if the Wake-Up flag is set */
+		if(PWR_GetFlagStatus(PWR_FLAG_WU) != RESET)
+		{
+			/* Clear Wake Up flag */
+			PWR_ClearFlag(PWR_FLAG_WU);
+		}
+
+		/* Wait until last write operation on RTC registers has finished */
+		RTC_WaitForLastTask();
+
+		/* Clear RTC Alarm interrupt pending bit */
+		RTC_ClearITPendingBit(RTC_IT_ALR);
+
+		/* Wait until last write operation on RTC registers has finished */
+		RTC_WaitForLastTask();
+	}
+}
+#endif
+
 /*******************************************************************************
  * Function Name  : DMA1_Channel5_IRQHandler
  * Description    : This function handles SPI2_TX_DMA interrupt request.
@@ -537,6 +617,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 {
 	USB_Istr();
 }
+
 
 /*******************************************************************************
  * Function Name  : PPP_IRQHandler

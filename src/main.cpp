@@ -147,6 +147,8 @@ int main(void)
 
 	Set_System();
 
+	SysTick_Configuration();
+
 	/* Enable CRC clock */
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
 
@@ -292,33 +294,10 @@ static void prvQueueReceiveTask( void *pvParameters )
 
 static void prvSetupHardware( void )
 {
-	/* Enable PWR and BKP clock */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-
-	/* Enable write access to Backup domain */
-	PWR_BackupAccessCmd(ENABLE);
-
-	/* NVIC configuration */
-	NVIC_Configuration();
-
-	/* Enable AFIO clock */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-
-	/* Configure TIM1 for LED-PWM and BUTTON-DEBOUNCE usage */
-	UI_Timer_Configure();
-
-	/* Configure the LEDs and set the default states */
-	int LEDx;
-	for(LEDx = 0; LEDx < LEDn; ++LEDx)
-	{
-		LED_Init((Led_TypeDef)LEDx);
-	}
+	Set_System();
 
 	LED_SetRGBColor(RGB_COLOR_RED);
 	LED_On(LED_RGB);
-
-	/* Configure the Button */
-	BUTTON_Init(BUTTON1, BUTTON_MODE_EXTI);
 }
 
 extern "C" {

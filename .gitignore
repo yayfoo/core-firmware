@@ -23,6 +23,7 @@ Debug/*
 Release/*
 
 # build folder
+build/*
 *.map
 *.lst
 *.d

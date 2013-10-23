@@ -28,6 +28,11 @@ Release/*
 *.d
 *.o
 
+# Delete this later
+*.bin
+*.elf
+*.hex
+
 # Platform-specific settings
 .settings/*
 .cproject

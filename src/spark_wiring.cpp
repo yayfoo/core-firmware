@@ -7,6 +7,10 @@
  */
 
 #include "spark_wiring.h"
+#include "spark_wiring_interrupts.h"
+#include "spark_wiring_usartserial.h"
+#include "spark_wiring_spi.h"
+#include "spark_wiring_i2c.h"
 
 /*
  * Globals
@@ -16,8 +20,6 @@ uint8_t adcInitFirstTime = true;
 uint8_t adcChannelConfigured = NONE;
 
 PinMode digitalPinModeSaved = (PinMode)NONE;
-
-uint8_t serial1_enabled = false;
 
 extern __IO uint32_t TimingMillis;
 
@@ -35,69 +37,27 @@ STM32_Pin_Info PIN_MAP[TOTAL_PINS] =
  * timer_ch (1-4, or NONE)
  * pin_mode (NONE by default, can be set to OUTPUT, INPUT, or other types)
  */
-	{ GPIOB, GPIO_Pin_7, NONE, TIM4, TIM_Channel_2, (PinMode)NONE },
-	{ GPIOB, GPIO_Pin_6, NONE, TIM4, TIM_Channel_1, (PinMode)NONE },
-	{ GPIOB, GPIO_Pin_5, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOB, GPIO_Pin_4, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOB, GPIO_Pin_3, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_15, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_14, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_13, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_8, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_9, NONE, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_0, ADC_Channel_0, TIM2, TIM_Channel_1, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_1, ADC_Channel_1, TIM2, TIM_Channel_2, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_4, ADC_Channel_4, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_5, ADC_Channel_5, NULL, NONE, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_6, ADC_Channel_6, TIM3, TIM_Channel_1, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_7, ADC_Channel_7, TIM3, TIM_Channel_2, (PinMode)NONE },
-	{ GPIOB, GPIO_Pin_0, ADC_Channel_8, TIM3, TIM_Channel_3, (PinMode)NONE },
-	{ GPIOB, GPIO_Pin_1, ADC_Channel_9, TIM3, TIM_Channel_4, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_3, ADC_Channel_3, TIM2, TIM_Channel_4, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_2, ADC_Channel_2, TIM2, TIM_Channel_3, (PinMode)NONE },
-	{ GPIOA, GPIO_Pin_10, NONE, NULL, NONE, (PinMode)NONE }
-};
-
-void serial_begin(uint32_t baudRate);
-void serial_end(void);
-uint8_t serial_available(void);
-int32_t serial_read(void);
-void serial_write(uint8_t Data);
-void serial_print(const char * str);
-void serial_println(const char * str);
-
-void serial1_begin(uint32_t baudRate);
-void serial1_end(void);
-uint8_t serial1_available(void);
-int32_t serial1_read(void);
-void serial1_write(uint8_t Data);
-void serial1_print(const char * str);
-void serial1_println(const char * str);
-
-/*
- * Serial Interfaces
- */
-
-Serial_Interface Serial =
-{
-	serial_begin,
-	serial_end,
-	serial_available,
-	serial_read,
-	serial_write,
-	serial_print,
-	serial_println
-};
-
-Serial_Interface Serial1 =
-{
-	serial1_begin,
-	serial1_end,
-	serial1_available,
-	serial1_read,
-	serial1_write,
-	serial1_print,
-	serial1_println
+  { GPIOB, GPIO_Pin_7, NONE, TIM4, TIM_Channel_2, (PinMode)NONE },
+  { GPIOB, GPIO_Pin_6, NONE, TIM4, TIM_Channel_1, (PinMode)NONE },
+  { GPIOB, GPIO_Pin_5, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOB, GPIO_Pin_4, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOB, GPIO_Pin_3, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_15, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_14, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_13, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_8, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_9, NONE, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_0, ADC_Channel_0, TIM2, TIM_Channel_1, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_1, ADC_Channel_1, TIM2, TIM_Channel_2, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_4, ADC_Channel_4, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_5, ADC_Channel_5, NULL, NONE, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_6, ADC_Channel_6, TIM3, TIM_Channel_1, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_7, ADC_Channel_7, TIM3, TIM_Channel_2, (PinMode)NONE },
+  { GPIOB, GPIO_Pin_0, ADC_Channel_8, TIM3, TIM_Channel_3, (PinMode)NONE },
+  { GPIOB, GPIO_Pin_1, ADC_Channel_9, TIM3, TIM_Channel_4, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_3, ADC_Channel_3, TIM2, TIM_Channel_4, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_2, ADC_Channel_2, TIM2, TIM_Channel_3, (PinMode)NONE },
+  { GPIOA, GPIO_Pin_10, NONE, NULL, NONE, (PinMode)NONE }
 };
 
 /*
@@ -111,8 +71,20 @@ void pinMode(uint16_t pin, PinMode setMode)
 		return;
 	}
 
+	// SPI safety check
+	if (SPI.isEnabled() == true && (pin == SCK || pin == MOSI || pin == MISO))
+	{
+		return;
+	}
+
+	// I2C safety check
+	if (Wire.isEnabled() == true && (pin == SCL || pin == SDA))
+	{
+		return;
+	}
+
 	// Serial1 safety check
-	if (serial1_enabled == true && (pin == RX || pin == TX))
+	if (Serial1.isEnabled() == true && (pin == RX || pin == TX))
 	{
 		return;
 	}
@@ -157,13 +129,19 @@ void pinMode(uint16_t pin, PinMode setMode)
 		PIN_MAP[pin].pin_mode = INPUT_PULLDOWN;
 		break;
 
-	case AF_OUTPUT:	//Used internally for Alternate Function Output(TIM, UART, SPI etc)
+	case AF_OUTPUT_PUSHPULL:	//Used internally for Alternate Function Output PushPull(TIM, UART, SPI etc)
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		PIN_MAP[pin].pin_mode = AF_OUTPUT;
+		PIN_MAP[pin].pin_mode = AF_OUTPUT_PUSHPULL;
 		break;
 
-	case AN_INPUT:	//Used internally for ADC Input
+	case AF_OUTPUT_DRAIN:		//Used internally for Alternate Function Output Drain(I2C etc)
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		PIN_MAP[pin].pin_mode = AF_OUTPUT_DRAIN;
+		break;
+
+	case AN_INPUT:				//Used internally for ADC Input
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 		PIN_MAP[pin].pin_mode = AN_INPUT;
 		break;
@@ -187,14 +165,26 @@ void digitalWrite(uint16_t pin, uint8_t value)
 		return;
 	}
 
+	// SPI safety check
+	if (SPI.isEnabled() == true && (pin == SCK || pin == MOSI || pin == MISO))
+	{
+		return;
+	}
+
+	// I2C safety check
+	if (Wire.isEnabled() == true && (pin == SCL || pin == SDA))
+	{
+		return;
+	}
+
 	// Serial1 safety check
-	if (serial1_enabled == true && (pin == RX || pin == TX))
+	if (Serial1.isEnabled() == true && (pin == RX || pin == TX))
 	{
 		return;
 	}
 
 	//If the pin is used by analogWrite, we need to change the mode
-	if(PIN_MAP[pin].pin_mode == AF_OUTPUT)
+	if(PIN_MAP[pin].pin_mode == AF_OUTPUT_PUSHPULL)
 	{
 		pinMode(pin, OUTPUT);
 	}
@@ -219,8 +209,20 @@ int32_t digitalRead(uint16_t pin)
 		return -1;
 	}
 
+	// SPI safety check
+	if (SPI.isEnabled() == true && (pin == SCK || pin == MOSI || pin == MISO))
+	{
+		return -1;
+	}
+
+	// I2C safety check
+	if (Wire.isEnabled() == true && (pin == SCL || pin == SDA))
+	{
+		return -1;
+	}
+
 	// Serial1 safety check
-	if (serial1_enabled == true && (pin == RX || pin == TX))
+	if (Serial1.isEnabled() == true && (pin == RX || pin == TX))
 	{
 		return -1;
 	}
@@ -305,8 +307,20 @@ int32_t analogRead(uint16_t pin)
 		pin = pin + FIRST_ANALOG_PIN;
 	}
 
+	// SPI safety check
+	if (SPI.isEnabled() == true && (pin == SCK || pin == MOSI || pin == MISO))
+	{
+		return -1;
+	}
+
+	// I2C safety check
+	if (Wire.isEnabled() == true && (pin == SCL || pin == SDA))
+	{
+		return -1;
+	}
+
 	// Serial1 safety check
-	if (serial1_enabled == true && (pin == RX || pin == TX))
+	if (Serial1.isEnabled() == true && (pin == RX || pin == TX))
 	{
 		return -1;
 	}
@@ -358,13 +372,25 @@ void analogWrite(uint16_t pin, uint8_t value)
 		return;
 	}
 
-	// Serial1 safety check
-	if (serial1_enabled == true && (pin == RX || pin == TX))
+	// SPI safety check
+	if (SPI.isEnabled() == true && (pin == SCK || pin == MOSI || pin == MISO))
 	{
 		return;
 	}
 
-	if(PIN_MAP[pin].pin_mode != OUTPUT && PIN_MAP[pin].pin_mode != AF_OUTPUT)
+	// I2C safety check
+	if (Wire.isEnabled() == true && (pin == SCL || pin == SDA))
+	{
+		return;
+	}
+
+	// Serial1 safety check
+	if (Serial1.isEnabled() == true && (pin == RX || pin == TX))
+	{
+		return;
+	}
+
+	if(PIN_MAP[pin].pin_mode != OUTPUT && PIN_MAP[pin].pin_mode != AF_OUTPUT_PUSHPULL)
 	{
 		return;
 	}
@@ -383,7 +409,7 @@ void analogWrite(uint16_t pin, uint8_t value)
 	// AFIO clock enable
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
-	pinMode(pin, AF_OUTPUT);
+	pinMode(pin, AF_OUTPUT_PUSHPULL);
 
 	// TIM clock enable
 	if(PIN_MAP[pin].timer_peripheral == TIM2)
@@ -496,131 +522,3 @@ void delayMicroseconds(uint32_t us)
 	 : "r0");
 	 */
 }
-
-void serial_begin(uint32_t baudRate)
-{
-	USB_USART_Init(baudRate);
-}
-
-void serial_end(void)
-{
-	//To Do
-}
-
-uint8_t serial_available(void)
-{
-	return USB_USART_Available_Data();
-}
-
-int32_t serial_read(void)
-{
-	return USB_USART_Receive_Data();
-}
-
-void serial_write(uint8_t Data)
-{
-	USB_USART_Send_Data(Data);
-}
-
-void serial_print(const char * str)
-{
-	while (*str)
-	{
-		serial_write(*str++);
-	}
-}
-
-void serial_println(const char * str)
-{
-	serial_print(str);
-	serial_print("\r\n");
-}
-
-void serial1_begin(uint32_t baudRate)
-{
-	USART_InitTypeDef USART_InitStructure;
-
-	// AFIO clock enable
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-
-	// Enable USART Clock
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-	// Configure USART Rx as input floating
-	pinMode(RX, INPUT);
-
-	// Configure USART Tx as alternate function push-pull
-	pinMode(TX, AF_OUTPUT);
-
-	// USART default configuration
-	// USART configured as follow:
-	// - BaudRate = (set baudRate as 9600 baud)
-	// - Word Length = 8 Bits
-	// - One Stop Bit
-	// - No parity
-	// - Hardware flow control disabled (RTS and CTS signals)
-	// - Receive and transmit enabled
-	USART_InitStructure.USART_BaudRate = baudRate;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-
-	// Configure USART
-	USART_Init(USART2, &USART_InitStructure);
-
-	// Enable the USART
-	USART_Cmd(USART2, ENABLE);
-
-	serial1_enabled = true;
-}
-
-void serial1_end(void)
-{
-	// Disable the USART
-	USART_Cmd(USART2, DISABLE);
-
-	serial1_enabled = false;
-}
-
-uint8_t serial1_available(void)
-{
-	// Check if the USART Receive Data Register is not empty
-	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET)
-		return 1;
-	else
-		return 0;
-}
-
-int32_t serial1_read(void)
-{
-	// Return the received byte
-	return USART_ReceiveData(USART2);
-}
-
-void serial1_write(uint8_t Data)
-{
-	// Send one byte from USART
-	USART_SendData(USART2, Data);
-
-	// Loop until USART DR register is empty
-	while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET)
-	{
-	}
-}
-
-void serial1_print(const char * str)
-{
-	while (*str)
-	{
-		serial1_write(*str++);
-	}
-}
-
-void serial1_println(const char * str)
-{
-	serial1_print(str);
-	serial1_print("\r\n");
-}
-

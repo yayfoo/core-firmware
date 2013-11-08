@@ -1,16 +1,20 @@
 #include "spark_wlan.h"
 #include "string.h"
+#include "wifi_credentials_reader.h"
 
-__IO uint32_t TimingSparkProcessAPI;
-__IO uint32_t TimingSparkAliveTimeout;
+__IO uint32_t TimingSparkCommTimeout;
 
 uint8_t WLAN_MANUAL_CONNECT = 0; //For Manual connection, set this to 1
+uint8_t WLAN_DELETE_PROFILES;
 uint8_t WLAN_SMART_CONFIG_START;
 uint8_t WLAN_SMART_CONFIG_STOP;
 uint8_t WLAN_SMART_CONFIG_FINISHED;
+uint8_t WLAN_SERIAL_CONFIG_DONE;
 uint8_t WLAN_CONNECTED;
 uint8_t WLAN_DHCP;
 uint8_t WLAN_CAN_SHUTDOWN;
+
+void (*announce_presence)(void);
 
 unsigned char patchVer[2];
 
@@ -27,14 +31,15 @@ char _password[] = "password";
 // Auth options are WLAN_SEC_UNSEC, WLAN_SEC_WPA, WLAN_SEC_WEP, and WLAN_SEC_WPA2
 unsigned char _auth = WLAN_SEC_WPA2;
 
+unsigned char wlan_profile_index;
+
 unsigned char NVMEM_Spark_File_Data[NVMEM_SPARK_FILE_SIZE];
 
 __IO uint8_t SPARK_WLAN_RESET;
 __IO uint8_t SPARK_WLAN_SLEEP;
 __IO uint8_t SPARK_WLAN_STARTED;
 __IO uint8_t SPARK_SOCKET_CONNECTED;
-__IO uint8_t SPARK_SOCKET_ALIVE;
-__IO uint8_t SPARK_DEVICE_ACKED;
+__IO uint8_t SPARK_HANDSHAKE_COMPLETED;
 __IO uint8_t SPARK_FLASH_UPDATE;
 __IO uint8_t SPARK_LED_FADE;
 
@@ -63,6 +68,13 @@ void Clear_NetApp_Dhcp(void)
 	netapp_dhcp(&pucIP_Addr, &pucSubnetMask, &pucIP_DefaultGWAddr, &pucDNS);
 }
 
+void wifi_add_profile_callback(const char *ssid, const char *password)
+{
+	wlan_profile_index = wlan_add_profile (WLAN_SEC_WPA2, (unsigned char *)ssid, strlen(ssid), NULL, 1, 0x18, 0x1e, 2, (unsigned char *)password, strlen(password));
+
+	WLAN_SERIAL_CONFIG_DONE = 1;
+}
+
 /*******************************************************************************
  * Function Name  : Start_Smart_Config.
  * Description    : The function triggers a smart configuration process on CC3000.
@@ -74,20 +86,17 @@ void Start_Smart_Config(void)
 {
 	WLAN_SMART_CONFIG_FINISHED = 0;
 	WLAN_SMART_CONFIG_STOP = 0;
+	WLAN_SERIAL_CONFIG_DONE = 0;
 	WLAN_CONNECTED = 0;
 	WLAN_DHCP = 0;
 	WLAN_CAN_SHUTDOWN = 0;
 
 	SPARK_SOCKET_CONNECTED = 0;
-	SPARK_SOCKET_ALIVE = 0;
-	SPARK_DEVICE_ACKED = 0;
+	SPARK_HANDSHAKE_COMPLETED = 0;
 	SPARK_FLASH_UPDATE = 0;
 	SPARK_LED_FADE = 0;
 
-	TimingSparkProcessAPI = 0;
-	TimingSparkAliveTimeout = 0;
-
-	unsigned char wlan_profile_index;
+	TimingSparkCommTimeout = 0;
 
 #if defined (USE_SPARK_CORE_V02)
 	LED_SetRGBColor(RGB_COLOR_BLUE);
@@ -119,15 +128,38 @@ void Start_Smart_Config(void)
 	/* Start the SmartConfig start process */
 	wlan_smart_config_start(1);
 
-	/* Wait for SmartConfig to finish */
-	while (WLAN_SMART_CONFIG_FINISHED == 0)
+	WiFiCredentialsReader wifi_creds_reader(wifi_add_profile_callback);
+
+	/* Wait for SmartConfig/SerialConfig to finish */
+	while (!(WLAN_SMART_CONFIG_FINISHED | WLAN_SERIAL_CONFIG_DONE))
 	{
+		if(WLAN_DELETE_PROFILES && wlan_ioctl_del_profile(255) == 0)
+		{
+			int toggle = 25;
+			while(toggle--)
+			{
 #if defined (USE_SPARK_CORE_V01)
-		LED_Toggle(LED2);
+				LED_Toggle(LED2);
 #elif defined (USE_SPARK_CORE_V02)
-		LED_Toggle(LED_RGB);
+				LED_Toggle(LED_RGB);
 #endif
-		Delay(250);
+				Delay(50);
+			}
+			NVMEM_Spark_File_Data[WLAN_PROFILE_FILE_OFFSET] = 0;
+			nvmem_write(NVMEM_SPARK_FILE_ID, 1, WLAN_PROFILE_FILE_OFFSET, &NVMEM_Spark_File_Data[WLAN_PROFILE_FILE_OFFSET]);
+			WLAN_DELETE_PROFILES = 0;
+		}
+		else
+		{
+#if defined (USE_SPARK_CORE_V01)
+			LED_Toggle(LED2);
+#elif defined (USE_SPARK_CORE_V02)
+			LED_Toggle(LED_RGB);
+#endif
+			Delay(250);
+
+			wifi_creds_reader.read();
+		}
 	}
 
 #if defined (USE_SPARK_CORE_V01)
@@ -145,8 +177,12 @@ void Start_Smart_Config(void)
 //			NVMEM_Spark_File_Data[WLAN_PROFILE_FILE_OFFSET] = 0;
 //	}
 
-	/* Decrypt configuration information and add profile */
-	wlan_profile_index = wlan_smart_config_process();
+	if(WLAN_SMART_CONFIG_FINISHED)
+	{
+		/* Decrypt configuration information and add profile */
+		wlan_profile_index = wlan_smart_config_process();
+	}
+
 	if(wlan_profile_index != -1)
 	{
 		NVMEM_Spark_File_Data[WLAN_PROFILE_FILE_OFFSET] = wlan_profile_index + 1;
@@ -220,13 +256,11 @@ void WLAN_Async_Callback(long lEventType, char *data, unsigned char length)
 			WLAN_CONNECTED = 0;
 			WLAN_DHCP = 0;
 			SPARK_SOCKET_CONNECTED = 0;
-			SPARK_SOCKET_ALIVE = 0;
-			SPARK_DEVICE_ACKED = 0;
+			SPARK_HANDSHAKE_COMPLETED = 0;
 			SPARK_FLASH_UPDATE = 0;
 			SPARK_LED_FADE = 0;
 			Spark_Error_Count = 0;
-			TimingSparkProcessAPI = 0;
-			TimingSparkAliveTimeout = 0;
+			TimingSparkCommTimeout = 0;
 			break;
 
 		case HCI_EVNT_WLAN_UNSOL_DHCP:
@@ -270,8 +304,10 @@ char *WLAN_BootLoader_Patch(unsigned long *length)
 	return NULL;
 }
 
-void SPARK_WLAN_Setup(void)
+void SPARK_WLAN_Setup(void (*presence_announcement_callback)(void))
 {
+  announce_presence = presence_announcement_callback;
+
 	/* Initialize CC3000's CS, EN and INT pins to their default states */
 	CC3000_WIFI_Init();
 
@@ -362,17 +398,26 @@ void SPARK_WLAN_Loop(void)
 			SPARK_WLAN_RESET = 0;
 			SPARK_WLAN_STARTED = 0;
 			SPARK_SOCKET_CONNECTED = 0;
-			SPARK_SOCKET_ALIVE = 0;
-			SPARK_DEVICE_ACKED = 0;
+			SPARK_HANDSHAKE_COMPLETED = 0;
 			SPARK_FLASH_UPDATE = 0;
 			SPARK_LED_FADE = 0;
 			Spark_Error_Count = 0;
-			TimingSparkProcessAPI = 0;
-			TimingSparkAliveTimeout = 0;
+			TimingSparkCommTimeout = 0;
 
 			CC3000_Write_Enable_Pin(WLAN_DISABLE);
 
 			Delay(100);
+
+			if(WLAN_SMART_CONFIG_START)
+			{
+				//Workaround to enter smart config when socket connect had blocked
+				wlan_start(0);
+
+				SPARK_WLAN_STARTED = 1;
+
+				/* Start CC3000 Smart Config Process */
+				Start_Smart_Config();
+			}
 
 			LED_SetRGBColor(RGB_COLOR_GREEN);
 			LED_On(LED_RGB);
@@ -416,6 +461,8 @@ void SPARK_WLAN_Loop(void)
 			loop_index++;
 		}
 
+		announce_presence();
+
 		WLAN_SMART_CONFIG_STOP = 0;
 
 	}
@@ -450,6 +497,9 @@ void SPARK_WLAN_Loop(void)
 
 		if(Spark_Connect() < 0)
 		{
+			if(SPARK_WLAN_RESET)
+				return;
+
 			if(Internet_Test() < 0)
 			{
 				//No Internet Connection
@@ -469,45 +519,6 @@ void SPARK_WLAN_Loop(void)
 		else
 		{
 			SPARK_SOCKET_CONNECTED = 1;
-		}
-	}
-}
-
-void SPARK_WLAN_Timing(void)
-{
-	if (WLAN_CONNECTED && SPARK_SOCKET_CONNECTED)
-	{
-		SPARK_SOCKET_ALIVE = 1;
-
-		if (TimingSparkProcessAPI >= TIMING_SPARK_PROCESS_API)
-		{
-			TimingSparkProcessAPI = 0;
-
-			if(Spark_Process_API_Response() < 0)
-				SPARK_SOCKET_ALIVE = 0;
-		}
-		else
-		{
-			TimingSparkProcessAPI++;
-		}
-
-		if (SPARK_DEVICE_ACKED)
-		{
-			if (TimingSparkAliveTimeout >= TIMING_SPARK_ALIVE_TIMEOUT)
-			{
-				TimingSparkAliveTimeout = 0;
-
-				SPARK_SOCKET_ALIVE = 0;
-			}
-			else
-			{
-				TimingSparkAliveTimeout++;
-			}
-		}
-
-		if(SPARK_SOCKET_ALIVE != 1)
-		{
-			SPARK_WLAN_RESET = 1;
 		}
 	}
 }

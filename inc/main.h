@@ -16,6 +16,9 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "hw_config.h"
 #include "spark_wlan.h"
 /* FreeRTOS Kernel includes. */
@@ -23,6 +26,9 @@ extern "C" {
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
+#ifdef __cplusplus
+}
+#endif
 
 /* Exported types ------------------------------------------------------------*/
 

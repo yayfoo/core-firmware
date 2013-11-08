@@ -21,8 +21,7 @@ extern "C" {
 #define WLAN_TIMEOUT_FILE_OFFSET	2
 #define ERROR_COUNT_FILE_OFFSET		3
 
-#define TIMING_SPARK_PROCESS_API	200		//200ms
-#define TIMING_SPARK_ALIVE_TIMEOUT	15000	//15sec
+#define TIMING_SPARK_COMM_TIMEOUT	30000	//30sec
 
 void Set_NetApp_Timeout(void);
 void Clear_NetApp_Dhcp(void);
@@ -34,7 +33,7 @@ char *WLAN_Firmware_Patch(unsigned long *length);
 char *WLAN_Driver_Patch(unsigned long *length);
 char *WLAN_BootLoader_Patch(unsigned long *length);
 
-void SPARK_WLAN_Setup(void);
+void SPARK_WLAN_Setup(void (*presence_announcement_callback)(void));
 void SPARK_WLAN_Loop(void);
 void SPARK_WLAN_Timing(void);
 
@@ -43,14 +42,17 @@ extern int Spark_Connect(void);
 extern int Spark_Disconnect(void);
 extern int Spark_Process_API_Response(void);
 
-extern __IO uint32_t TimingSparkAliveTimeout;
+extern __IO uint32_t TimingSparkCommTimeout;
 
+extern uint8_t WLAN_DHCP;
+extern __IO uint8_t SPARK_WLAN_RESET;
 extern __IO uint8_t SPARK_WLAN_SLEEP;
 extern __IO uint8_t SPARK_SOCKET_CONNECTED;
-extern __IO uint8_t SPARK_DEVICE_ACKED;
+extern __IO uint8_t SPARK_HANDSHAKE_COMPLETED;
 extern __IO uint8_t SPARK_FLASH_UPDATE;
 extern __IO uint8_t SPARK_LED_FADE;
 
+extern uint8_t WLAN_DELETE_PROFILES;
 extern uint8_t WLAN_SMART_CONFIG_START;
 
 extern __IO uint8_t Spark_Error_Count;

@@ -1,159 +1,177 @@
+/**
+  ******************************************************************************
+  * @file    application.cpp
+  * @authors  Satish Nair, Zachary Crockett and Mohit Bhoite
+  * @version V1.0.0
+  * @date    05-November-2013
+  * @brief   Tinker application
+  ******************************************************************************
+  Copyright (c) 2013 Spark Labs, Inc.  All rights reserved.
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation, either
+  version 3 of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this program; if not, see <http://www.gnu.org/licenses/>.
+  ******************************************************************************
+  */
+
+/* Includes ------------------------------------------------------------------*/  
 #include "application.h"
-#include "string.h"
-#include "handshake.h"
 
-__IO uint32_t LED_Signaling_Timing;
-uint32_t VIBGYOR_Colors[] = {0xEE82EE, 0x4B0082, 0x0000FF, 0x00FF00, 0xFFFF00, 0xFFA500, 0xFF0000};
-uint32_t i, n = sizeof(VIBGYOR_Colors) / sizeof(uint32_t);
 
-/*
-int toggle = 0;
-int UserLedToggle(char *ledPin);
+/* Function prototypes -------------------------------------------------------*/
+int tinkerDigitalRead(String pin);
+int tinkerDigitalWrite(String command);
+int tinkerAnalogRead(String pin);
+int tinkerAnalogWrite(String command);
 
-double testReal = 99.99;
-*/
-
-/*
-unsigned char ciphertext[256];
-int err, encrypt = 1;
-
-unsigned char nonce[40] =
-{
-	1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1
-};
-unsigned char id[12];
-unsigned char pubkey[EXTERNAL_FLASH_SERVER_PUBLIC_KEY_LENGTH];
-*/
-
+/* This function is called once at start up ----------------------------------*/
 void setup()
 {
-	// runs once
+	//Setup the Tinker application here
 
-/*
-	memset(ciphertext, 0, 256);
-	memcpy(id, (void *)0x01fff7e8, 12);
-	FLASH_Read_ServerPublicKey(pubkey);
+	//Register all the Tinker functions
+	Spark.function("digitalread", tinkerDigitalRead);
+	Spark.function("digitalwrite", tinkerDigitalWrite);
 
-	pinMode(D7, OUTPUT);
-	digitalWrite(D7, LOW);
-	delay(500);
-	digitalWrite(D7, HIGH);
-	delay(500);
-	digitalWrite(D7, LOW);
-*/
+	Spark.function("analogread", tinkerAnalogRead);
+	Spark.function("analogwrite", tinkerAnalogWrite);
 
-/*
-	// Serial Test
-	Serial.begin(9600);
-*/
-
-/*
-	//Register UserLedToggle() function
-	Spark.function("UserLed", UserLedToggle);
-
-	//Register testReal variable
-	Spark.variable("testReal", &testReal, DOUBLE);
-*/
 }
 
+
+/* This function loops forever --------------------------------------------*/
 void loop()
 {
-	// runs repeatedly
-/*
-	// Serial loopback test: what is typed on serial console
-	// using Hyperterminal/Putty should echo back on the console
-	if(Serial.available())
-	{
-		Serial.write(Serial.read());
-	}
-*/
-
-/*
-	// Serial print test
-	Serial.print("Hello ");
-	Serial.println("Spark");
-	Serial.print("err: ");
-	Serial.println(0 == err ? "zero" : "non-zero");
-	Serial.print("ciphertext: ");
-	Serial.println((char *)ciphertext);
-	delay(2000);
-*/
-
-/*
-	if(encrypt)
-	{
-		err = ciphertext_from_nonce_and_id(nonce, id, pubkey, ciphertext);
-		if(err == 0)
-		{
-			//Success
-			digitalWrite(D7, HIGH);
-		}
-		encrypt = 0;
-	}
-*/
-
-/*
-	// Call this in the process_command() to schedule the "UserLedToggle" function to execute
-	userFuncSchedule("UserLed", 0xc3, "D7");
-
-	// Call this in the process_command() to schedule the return of "testReal" value
-	userVarSchedule("testReal", 0xa1);
-
-	delay(1000);
-*/
+	//This will run in a loop
 }
 
-/*
-int UserLedToggle(char *ledPin)
+
+/*******************************************************************************
+ * Function Name  : tinkerDigitalRead
+ * Description    : Reads the digital value of a given pin
+ * Input          : Pin 
+ * Output         : None.
+ * Return         : Value of the pin (0 or 1) in INT type
+ 						  Returns -1 on fail
+ *******************************************************************************/
+int tinkerDigitalRead(String pin)
 {
-	if(0 == strncmp("D7", ledPin, strlen(ledPin)))
+	//convert ascii to integer
+	int pinNumber = pin.charAt(1) - '0';
+	//Sanity check to see if the pin numbers are within limits
+	if (pinNumber< 0 || pinNumber >7) return -1;
+
+	if(pin.startsWith("D"))
 	{
-		toggle ^= 1;
-		digitalWrite(D7, toggle);
+		pinMode(pinNumber, INPUT_PULLDOWN);
+		return digitalRead(pinNumber);
+	}
+	else if (pin.startsWith("A"))
+	{
+		pinMode(pinNumber+10, INPUT_PULLDOWN);
+		return digitalRead(pinNumber+10);
+	}
+	return -1;
+}
+
+/*******************************************************************************
+ * Function Name  : tinkerDigitalWrite
+ * Description    : Sets the specified pin HIGH or LOW
+ * Input          : Pin and value
+ * Output         : None.
+ * Return         : 1 on success and -1 on fail
+ *******************************************************************************/
+int tinkerDigitalWrite(String command)
+{
+	bool value = 0;
+	//convert ascii to integer
+	int pinNumber = command.charAt(1) - '0';
+	//Sanity check to see if the pin numbers are within limits
+	if (pinNumber< 0 || pinNumber >7) return -1;
+
+	if(command.substring(3,7) == "HIGH") value = 1;
+	else if(command.substring(3,6) == "LOW") value = 0;
+	else return -1;
+
+	if(command.startsWith("D"))
+	{
+		pinMode(pinNumber, OUTPUT);
+		digitalWrite(pinNumber, value);
 		return 1;
 	}
-	return 0;
-}
-*/
-
-/* This should be a "NON-BlOCKING" function
- * It will be executed every 1ms if LED_Signaling_Start() is called
- * and stopped as soon as LED_Signaling_Stop() is called */
-void LED_Signaling_Override(void)
-{
-    if (LED_Signaling_Timing != 0)
-    {
-    	LED_Signaling_Timing--;
-    }
-    else
+	else if(command.startsWith("A"))
 	{
-		LED_SetSignalingColor(VIBGYOR_Colors[i]);
-		LED_On(LED_RGB);
-
-		LED_Signaling_Timing = 100;	//100ms
-
-		++i;
-		if(i >= n)
-		{
-			i = 0;
-		}
+		pinMode(pinNumber+10, OUTPUT);
+		digitalWrite(pinNumber+10, value);
+		return 1;
 	}
+	else return -1;
 }
 
-char handleMessage(char *user_arg)
+/*******************************************************************************
+ * Function Name  : tinkerAnalogRead
+ * Description    : Reads the analog value of a pin
+ * Input          : Pin 
+ * Output         : None.
+ * Return         : Returns the analog value in INT type (0 to 4095)
+ 						  Returns -1 on fail
+ *******************************************************************************/
+int tinkerAnalogRead(String pin)
 {
-	if(0 == strncmp(user_arg, "led_signaling_start", strlen("led_signaling_start")))
-	{
-		LED_Signaling_Start();
-	}
-	else if(0 == strncmp(user_arg, "led_signaling_stop", strlen("led_signaling_stop")))
-	{
-		LED_Signaling_Stop();
-	}
+	//convert ascii to integer
+	int pinNumber = pin.charAt(1) - '0';
+	//Sanity check to see if the pin numbers are within limits
+	if (pinNumber< 0 || pinNumber >7) return -1;
 
-	return 0;
+	if(pin.startsWith("D"))
+	{
+		pinMode(pinNumber, INPUT);
+		return analogRead(pinNumber);
+	}
+	else if (pin.startsWith("A"))
+	{
+		pinMode(pinNumber+10, INPUT);
+		return analogRead(pinNumber+10);
+	}
+	return -1;
+}
+
+/*******************************************************************************
+ * Function Name  : tinkerAnalogWrite
+ * Description    : Writes an analog value (PWM) to the specified pin
+ * Input          : Pin and Value (0 to 255)
+ * Output         : None.
+ * Return         : 1 on success and -1 on fail
+ *******************************************************************************/
+int tinkerAnalogWrite(String command)
+{
+	//convert ascii to integer
+	int pinNumber = command.charAt(1) - '0';
+	//Sanity check to see if the pin numbers are within limits
+	if (pinNumber< 0 || pinNumber >7) return -1;
+
+	String value = command.substring(3);
+
+	if(command.startsWith("D"))
+	{
+		pinMode(pinNumber, OUTPUT);
+		analogWrite(pinNumber, value.toInt());
+		return 1;
+	}
+	else if(command.startsWith("A"))
+	{
+		pinMode(pinNumber+10, OUTPUT);
+		analogWrite(pinNumber+10, value.toInt());
+		return 1;
+	}
+	else return -1;
 }

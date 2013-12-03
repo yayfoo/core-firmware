@@ -6,13 +6,17 @@ CPP_SRCS += \
 ../src/newlib_stubs.cpp \
 ../src/spark_utilities.cpp \
 ../src/spark_wiring.cpp \
-../src/spark_wiring_hardwareserial.cpp \
 ../src/spark_wiring_i2c.cpp \
 ../src/spark_wiring_interrupts.cpp \
+../src/spark_wiring_ipaddress.cpp \
+../src/spark_wiring_network.cpp \
 ../src/spark_wiring_print.cpp \
 ../src/spark_wiring_spi.cpp \
 ../src/spark_wiring_stream.cpp \
 ../src/spark_wiring_string.cpp \
+../src/spark_wiring_tcpclient.cpp \
+../src/spark_wiring_tcpserver.cpp \
+../src/spark_wiring_udp.cpp \
 ../src/spark_wiring_usartserial.cpp \
 ../src/spark_wiring_usbserial.cpp \
 ../src/spark_wlan.cpp \
@@ -21,7 +25,7 @@ CPP_SRCS += \
 ../src/usb_endp.cpp \
 ../src/usb_istr.cpp \
 ../src/usb_prop.cpp \
-../src/wifi_credentials_reader.cpp
+../src/wifi_credentials_reader.cpp 
 
 OBJS += \
 ./src/application.o \
@@ -29,13 +33,17 @@ OBJS += \
 ./src/newlib_stubs.o \
 ./src/spark_utilities.o \
 ./src/spark_wiring.o \
-./src/spark_wiring_hardwareserial.o \
 ./src/spark_wiring_i2c.o \
 ./src/spark_wiring_interrupts.o \
+./src/spark_wiring_ipaddress.o \
+./src/spark_wiring_network.o \
 ./src/spark_wiring_print.o \
 ./src/spark_wiring_spi.o \
 ./src/spark_wiring_stream.o \
 ./src/spark_wiring_string.o \
+./src/spark_wiring_tcpclient.o \
+./src/spark_wiring_tcpserver.o \
+./src/spark_wiring_udp.o \
 ./src/spark_wiring_usartserial.o \
 ./src/spark_wiring_usbserial.o \
 ./src/spark_wlan.o \
@@ -44,7 +52,7 @@ OBJS += \
 ./src/usb_endp.o \
 ./src/usb_istr.o \
 ./src/usb_prop.o \
-./src/wifi_credentials_reader.o
+./src/wifi_credentials_reader.o 
 
 CPP_DEPS += \
 ./src/application.d \
@@ -52,13 +60,17 @@ CPP_DEPS += \
 ./src/newlib_stubs.d \
 ./src/spark_utilities.d \
 ./src/spark_wiring.d \
-./src/spark_wiring_hardwareserial.d \
 ./src/spark_wiring_i2c.d \
 ./src/spark_wiring_interrupts.d \
+./src/spark_wiring_ipaddress.d \
+./src/spark_wiring_network.d \
 ./src/spark_wiring_print.d \
 ./src/spark_wiring_spi.d \
 ./src/spark_wiring_stream.d \
 ./src/spark_wiring_string.d \
+./src/spark_wiring_tcpclient.d \
+./src/spark_wiring_tcpserver.d \
+./src/spark_wiring_udp.d \
 ./src/spark_wiring_usartserial.d \
 ./src/spark_wiring_usbserial.d \
 ./src/spark_wlan.d \
@@ -67,7 +79,7 @@ CPP_DEPS += \
 ./src/usb_endp.d \
 ./src/usb_istr.d \
 ./src/usb_prop.d \
-./src/wifi_credentials_reader.d
+./src/wifi_credentials_reader.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

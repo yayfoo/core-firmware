@@ -1,27 +1,66 @@
+/**
+  ******************************************************************************
+  * @file    newlib_stubs.cpp
+  * @author  Zachary Crockett
+  * @version V1.0.0
+  * @date    24-April-2013
+  * @brief   
+  ******************************************************************************
+  Copyright (c) 2013 Spark Labs, Inc.  All rights reserved.
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation, either
+  version 3 of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this program; if not, see <http://www.gnu.org/licenses/>.
+  ******************************************************************************
+*/
+
 /* Define caddr_t as char* */
 #include <sys/types.h>
 
 /* Define abort() */
 #include <stdlib.h>
 
-/*
- * The default pulls in 70K of garbage
- */
+extern unsigned long __preinit_array_start;
+extern unsigned long __preinit_array_end;
+extern unsigned long __init_array_start;
+extern unsigned long __init_array_end;
+extern unsigned long __fini_array_start;
+extern unsigned long __fini_array_end;
 
-namespace __gnu_cxx {
-void __verbose_terminate_handler()
+static void call_constructors(unsigned long *start, unsigned long *end) __attribute__((noinline));
+
+static void call_constructors(unsigned long *start, unsigned long *end)
 {
-	for(;;);
-}
+	unsigned long *i;
+	void (*funcptr)();
+	for (i = start; i < end; i++)
+	{
+		funcptr=(void (*)())(*i);
+		funcptr();
+	}
 }
 
-/*
- * The default pulls in about 12K of garbage
- */
-
-extern "C" void __cxa_pure_virtual()
+extern "C" {
+void CallConstructors(void)
 {
-	for(;;);
+	call_constructors(&__preinit_array_start, &__preinit_array_end);
+	call_constructors(&__init_array_start, &__init_array_end);
+	call_constructors(&__fini_array_start, &__fini_array_end);
+}
+} /* extern "C" */
+
+extern "C"
+{
+void *__dso_handle = NULL;
 }
 
 /*

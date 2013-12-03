@@ -41,7 +41,7 @@
 
 /* Extern variables ----------------------------------------------------------*/
 extern __IO uint16_t BUTTON_DEBOUNCED_TIME[];
-extern xTimerHandle xLEDTimer;
+extern xTimerHandle xTestTimer;
 
 /* Private function prototypes -----------------------------------------------*/
 void Wiring_ADC1_2_Interrupt_Handler(void) __attribute__ ((weak));
@@ -337,7 +337,7 @@ void EXTI2_IRQHandler(void)
 		/* This interrupt safe FreeRTOS function can be called from this interrupt
 			because the interrupt priority is below the
 			configMAX_SYSCALL_INTERRUPT_PRIORITY setting in FreeRTOSConfig.h. */
-		xTimerResetFromISR( xLEDTimer, &xHigherPriorityTaskWoken );
+		xTimerResetFromISR( xTestTimer, &xHigherPriorityTaskWoken );
 
 		/* Clear the interrupt before leaving. */
 		EXTI_ClearITPendingBit( EXTI_Line2 );

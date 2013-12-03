@@ -75,8 +75,8 @@ extern "C" {
  * During JTAG program/debug, the Watchdog has to be disabled so that it does not
  * upset the debugger
  */
-#define IWDG_RESET_ENABLE
-#define TIMING_IWDG_RELOAD	1000 //1sec
+//#define IWDG_RESET_ENABLE
+//#define TIMING_IWDG_RELOAD	1000 //1sec
 
 #endif
 

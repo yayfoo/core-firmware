@@ -39,12 +39,13 @@ extern "C" {
 
 /* Private define ------------------------------------------------------------*/
 /* Priorities at which the tasks are created. */
-#define mainQUEUE_RECEIVE_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
-#define	mainQUEUE_SEND_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
+#define mainSPARK_LED_TASK_PRIORITY			( tskIDLE_PRIORITY + 3 )
+#define mainSPARK_WLAN_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
+#define	mainSPARK_WIRING_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 
 /* The rate at which data is sent to the queue, specified in milliseconds, and
 converted to ticks using the portTICK_RATE_MS constant. */
-#define mainQUEUE_SEND_FREQUENCY_MS			( 200 / portTICK_RATE_MS )
+#define mainQUEUE_SEND_FREQUENCY_MS			( 100 / portTICK_RATE_MS )
 
 /* The number of items the queue can hold.  This is 1 as the receive task
 will remove items as they are added, meaning the send task should always find
@@ -75,10 +76,10 @@ uint32_t USB_USART_BaudRate = 9600;
 /* The queue used by both tasks. */
 xQueueHandle xQueue = NULL;
 
-/* The LED software timer.  This uses vLEDTimerCallback() as its callback
+/* The LED software timer.  This uses vTestTimerCallback() as its callback
  * function.
  */
-xTimerHandle xLEDTimer = NULL;
+xTimerHandle xTestTimer = NULL;
 
 /*
  * Setup the NVIC, LED outputs, and button inputs.
@@ -88,14 +89,14 @@ static void prvSetupHardware( void );
 /*
  * The tasks as described in the comments at the top of this file.
  */
-static void prvQueueReceiveTask( void *pvParameters );
-static void prvQueueSendTask( void *pvParameters );
+static void prvSparkLedTask( void *pvParameters );
+static void prvSparkWlanTask( void *pvParameters );
+static void prvSparkWiringTask( void *pvParameters );
 
 /*
- * The LED timer callback function.  This does nothing but switch the red LED
- * off.
+ * Test timer callback function.
  */
-static void vLEDTimerCallback( xTimerHandle xTimer );
+static void vTestTimerCallback( xTimerHandle xTimer );
 
 static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 
@@ -115,19 +116,7 @@ extern LINE_CODING linecoding;
  *******************************************************************************/
 int main(void)
 {
-#ifdef DFU_BUILD_ENABLE
-	/* Set the Vector Table(VT) base location at 0x5000 */
-	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x5000);
-
-	USE_SYSTEM_FLAGS = 1;
-#endif
-
-#ifdef SWD_JTAG_DISABLE
-	/* Disable the Serial Wire JTAG Debug Port SWJ-DP */
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-#endif
-
-	/* Configure the NVIC, LED outputs and button inputs. */
+	/* Configure and setup the hardware */
 	prvSetupHardware();
 
 	/* Create the queue. */
@@ -135,19 +124,17 @@ int main(void)
 
 	if( xQueue != NULL )
 	{
-		/* Start the two tasks as described in the comments at the top of this
-		file. */
-		xTaskCreate( prvQueueReceiveTask, ( signed char * ) "Rx", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
-		xTaskCreate( prvQueueSendTask, ( signed char * ) "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+		/* Start the tasks as described */
+		xTaskCreate( prvSparkLedTask, ( signed char * ) "SPARK_LED", configMINIMAL_STACK_SIZE, NULL, mainSPARK_LED_TASK_PRIORITY, NULL );
+		xTaskCreate( prvSparkWlanTask, ( signed char * ) "SPARK_WLAN", 512, NULL, mainSPARK_WLAN_TASK_PRIORITY, NULL );
+		xTaskCreate( prvSparkWiringTask, ( signed char * ) "SPARK_WIRING", configMINIMAL_STACK_SIZE, NULL, mainSPARK_WIRING_TASK_PRIORITY, NULL );
 
-		/* Create the software timer that is responsible for turning off the LED
-		if the button is not pushed within 5000ms, as described at the top of
-		this file. */
-		xLEDTimer = xTimerCreate( 	( const signed char * ) "LEDTimer", /* A text name, purely to help debugging. */
+		/* Create a software timer */
+		xTestTimer = xTimerCreate( 	( const signed char * ) "TestTimer", /* A text name, purely to help debugging. */
 									( 5000 / portTICK_RATE_MS ),		/* The timer period, in this case 5000ms (5s). */
 									pdFALSE,							/* This is a one shot timer, so xAutoReload is set to pdFALSE. */
 									( void * ) 0,						/* The ID is not used, so can be set to anything. */
-									vLEDTimerCallback					/* The callback function that switches the LED off. */
+									vTestTimerCallback					/* The callback function that switches the LED off. */
 								);
 
 		/* Start the tasks and timer running. */
@@ -160,57 +147,87 @@ int main(void)
 	to be created.  See the memory management section on the FreeRTOS web site
 	for more details. */
 	for( ;; );
+}
 
-	/* Following lines barred from execution to test FreeRTOS */
-
-	Set_System();
-
-	SysTick_Configuration();
-
-	/* Enable CRC clock */
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
-
-#if defined (USE_SPARK_CORE_V02)
-	LED_SetRGBColor(RGB_COLOR_WHITE);
+static void vTestTimerCallback( xTimerHandle xTimer )
+{
+	/* The timer has expired */
+	LED_SetRGBColor(RGB_COLOR_RED);
 	LED_On(LED_RGB);
-	SPARK_LED_FADE = 1;
+}
 
-#if defined (SPARK_RTC_ENABLE)
-	RTC_Configuration();
-#endif
-#endif
-
-#ifdef IWDG_RESET_ENABLE
-	/* Check if the system has resumed from IWDG reset */
-	if (RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET)
+static void prvSparkLedTask( void *pvParameters )
+{
+	for( ;; )
 	{
-		/* IWDGRST flag set */
-		IWDG_SYSTEM_RESET = 1;
+		vTaskDelay( 100 );//100ms delay
 
-		/* Clear reset flags */
-		RCC_ClearFlag();
+		LED_Toggle( LED_RGB );
 	}
+}
 
-	/* Set IWDG Timeout to 3 secs */
-	IWDG_Reset_Enable(3 * TIMING_IWDG_RELOAD);
-#endif
+static void prvSparkWiringTask( void *pvParameters )
+{
+//	portTickType xNextWakeTime;
+//	const unsigned long ulValueToSend = 100UL;
+//
+//	/* Initialise xNextWakeTime - this only needs to be done once. */
+//	xNextWakeTime = xTaskGetTickCount();
 
-#ifdef DFU_BUILD_ENABLE
-	Load_SystemFlags();
-#endif
-
-#ifdef SPARK_SFLASH_ENABLE
-	sFLASH_Init();
-#endif
-
-#ifdef SPARK_WLAN_ENABLE
-	SPARK_WLAN_Setup(Multicast_Presence_Announcement);
-#endif
-
-	/* Main loop */
-	while (1)
+	for( ;; )
 	{
-#ifdef SPARK_WLAN_ENABLE
+//		/* Place this task in the blocked state until it is time to run again.
+//		The block time is specified in ticks, the constant used converts ticks
+//		to ms.  While in the Blocked state this task will not consume any CPU
+//		time. */
+//		vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
+//
+//		/* Send to the queue - causing the queue receive task to unblock
+//		0 is used as the block time so the sending operation will not block
+//		- it shouldn't need to block as the queue should always be empty at
+//		this point in the code. */
+//		xQueueSend( xQueue, &ulValueToSend, 0 );
+
+		if(SPARK_HANDSHAKE_COMPLETED && !SPARK_FLASH_UPDATE && !IWDG_SYSTEM_RESET)
+		{
+			if((ApplicationSetupOnce != 0) && (NULL != setup))
+			{
+				//Execute user application setup only once
+				setup();
+				ApplicationSetupOnce = 0;
+			}
+
+			if(NULL != loop)
+			{
+				//Execute user application loop
+				loop();
+			}
+
+			userEventSend();
+		}
+	}
+}
+
+static void prvSparkWlanTask( void *pvParameters )
+{
+//	unsigned long ulReceivedValue;
+
+	SPARK_WLAN_Setup(Multicast_Presence_Announcement);
+
+	for( ;; )
+	{
+//		/* Wait until something arrives in the queue - this task will block
+//		indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
+//		FreeRTOSConfig.h. */
+//		xQueueReceive( xQueue, &ulReceivedValue, portMAX_DELAY );
+//
+//		/*  To get here something must have been received from the queue, but
+//		is it the expected value?  If it is, do something */
+//		if( ulReceivedValue == 100UL )
+//		{
+//			LED_Toggle( USER_LED );
+//		}
+
 		SPARK_WLAN_Loop();
 
 		if (SPARK_SOCKET_CONNECTED)
@@ -256,100 +273,68 @@ int main(void)
 				SPARK_SOCKET_CONNECTED = 0;
 			}
 		}
-#endif
-
-#ifdef SPARK_WIRING_ENABLE
-#ifdef SPARK_WLAN_ENABLE
-		if(SPARK_HANDSHAKE_COMPLETED && !SPARK_FLASH_UPDATE && !IWDG_SYSTEM_RESET)
-		{
-#endif
-			if((ApplicationSetupOnce != 0) && (NULL != setup))
-			{
-				//Execute user application setup only once
-				setup();
-				ApplicationSetupOnce = 0;
-			}
-
-			if(NULL != loop)
-			{
-				//Execute user application loop
-				loop();
-			}
-
-			userEventSend();
-
-#ifdef SPARK_WLAN_ENABLE
-		}
-#endif
-#endif
-	}
-}
-
-static void vLEDTimerCallback( xTimerHandle xTimer )
-{
-	/* The timer has expired - so no button pushes have occurred
-	in the last five seconds - change the RGB color back to CYAN.
-	NOTE - accessing the LED port should use a critical section because
-	it is accessed from multiple tasks, and the button interrupt - in this
-	trivial case, for simplicity, the critical section is omitted. */
-	LED_SetRGBColor(RGB_COLOR_RED);
-	LED_On(LED_RGB);
-}
-
-static void prvQueueSendTask( void *pvParameters )
-{
-	portTickType xNextWakeTime;
-	const unsigned long ulValueToSend = 100UL;
-
-	/* Initialise xNextWakeTime - this only needs to be done once. */
-	xNextWakeTime = xTaskGetTickCount();
-
-	for( ;; )
-	{
-		/* Place this task in the blocked state until it is time to run again.
-		The block time is specified in ticks, the constant used converts ticks
-		to ms.  While in the Blocked state this task will not consume any CPU
-		time. */
-		vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
-
-		/* Send to the queue - causing the queue receive task to unblock and
-		toggle an LED.  0 is used as the block time so the sending operation
-		will not block - it shouldn't need to block as the queue should always
-		be empty at this point in the code. */
-		xQueueSend( xQueue, &ulValueToSend, 0 );
-	}
-}
-
-static void prvQueueReceiveTask( void *pvParameters )
-{
-	unsigned long ulReceivedValue;
-
-	for( ;; )
-	{
-		/* Wait until something arrives in the queue - this task will block
-		indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
-		FreeRTOSConfig.h. */
-		xQueueReceive( xQueue, &ulReceivedValue, portMAX_DELAY );
-
-		/*  To get here something must have been received from the queue, but
-		is it the expected value?  If it is, toggle the green LED. */
-		if( ulReceivedValue == 100UL )
-		{
-			/* NOTE - accessing the LED port should use a critical section
-			because it is accessed from multiple tasks, and the button interrupt
-			- in this trivial case, for simplicity, the critical section is
-			omitted. */
-			LED_Toggle( LED_RGB );
-		}
 	}
 }
 
 static void prvSetupHardware( void )
 {
+#ifdef DFU_BUILD_ENABLE
+	/* Set the Vector Table(VT) base location at 0x5000 */
+	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x5000);
+
+	USE_SYSTEM_FLAGS = 1;
+#endif
+
+#ifdef SWD_JTAG_DISABLE
+	/* Disable the Serial Wire JTAG Debug Port SWJ-DP */
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+#endif
+
 	Set_System();
 
-	LED_SetRGBColor(RGB_COLOR_RED);
+	/* Enable CRC clock */
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
+
+#if defined (USE_SPARK_CORE_V02)
+	LED_SetRGBColor(RGB_COLOR_WHITE);
 	LED_On(LED_RGB);
+	SPARK_LED_FADE = 1;
+
+#if defined (SPARK_RTC_ENABLE)
+	RTC_Configuration();
+#endif
+#endif
+
+#ifdef IWDG_RESET_ENABLE
+	/* Check if the system has resumed from IWDG reset */
+	if (RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET)
+	{
+		/* IWDGRST flag set */
+		IWDG_SYSTEM_RESET = 1;
+
+		/* Clear reset flags */
+		RCC_ClearFlag();
+	}
+
+	/* Set IWDG Timeout to 3 secs */
+	IWDG_Reset_Enable(3 * TIMING_IWDG_RELOAD);
+#endif
+
+#ifdef DFU_BUILD_ENABLE
+	Load_SystemFlags();
+#endif
+
+	sFLASH_Init();
+
+	/* Initialize CC3000's CS, EN and INT pins to their default states */
+	CC3000_WIFI_Init();
+
+	/* Configure & initialize CC3000 SPI_DMA Interface */
+	CC3000_SPI_DMA_Init();
+
+	/* WLAN On API Implementation */
+	wlan_init(WLAN_Async_Callback, WLAN_Firmware_Patch, WLAN_Driver_Patch, WLAN_BootLoader_Patch,
+				CC3000_Read_Interrupt_Pin, CC3000_Interrupt_Enable, CC3000_Interrupt_Disable, CC3000_Write_Enable_Pin);
 }
 
 extern "C" {
@@ -459,7 +444,6 @@ void Timing_Decrement(void)
 			TimingLED = 100;	//100ms
 	}
 
-#ifdef SPARK_WLAN_ENABLE
 	if(!WLAN_SMART_CONFIG_START && BUTTON_GetDebouncedTime(BUTTON1) >= 3000)
 	{
 		BUTTON_ResetDebouncedState(BUTTON1);
@@ -500,7 +484,6 @@ void Timing_Decrement(void)
 			TimingSparkCommTimeout++;
 		}
 	}
-#endif
 
 #ifdef IWDG_RESET_ENABLE
 	if (TimingIWDGReload >= TIMING_IWDG_RELOAD)

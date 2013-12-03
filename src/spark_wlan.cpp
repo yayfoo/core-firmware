@@ -138,8 +138,8 @@ void Start_Smart_Config(void)
 	/* Wait until CC3000 is disconnected */
 	while (WLAN_CONNECTED == 1)
 	{
-		//Delay 100ms
-		Delay(100);
+		//vTaskDelay 100ms
+		vTaskDelay(100);
 		hci_unsolicited_event_handler();
 	}
 
@@ -169,7 +169,7 @@ void Start_Smart_Config(void)
 #elif defined (USE_SPARK_CORE_V02)
 				LED_Toggle(LED_RGB);
 #endif
-				Delay(50);
+				vTaskDelay(50);
 			}
 			NVMEM_Spark_File_Data[WLAN_PROFILE_FILE_OFFSET] = 0;
 			nvmem_write(NVMEM_SPARK_FILE_ID, 1, WLAN_PROFILE_FILE_OFFSET, &NVMEM_Spark_File_Data[WLAN_PROFILE_FILE_OFFSET]);
@@ -182,7 +182,7 @@ void Start_Smart_Config(void)
 #elif defined (USE_SPARK_CORE_V02)
 			LED_Toggle(LED_RGB);
 #endif
-			Delay(250);
+			vTaskDelay(250);
 
 			wifi_creds_reader.read();
 		}
@@ -226,7 +226,7 @@ void Start_Smart_Config(void)
 	/* Reset the CC3000 */
 	wlan_stop();
 
-	Delay(100);
+	vTaskDelay(100);
 
 	wlan_start(0);
 
@@ -334,17 +334,7 @@ void SPARK_WLAN_Setup(void (*presence_announcement_callback)(void))
 {
   announce_presence = presence_announcement_callback;
 
-	/* Initialize CC3000's CS, EN and INT pins to their default states */
-	CC3000_WIFI_Init();
-
-	/* Configure & initialize CC3000 SPI_DMA Interface */
-	CC3000_SPI_DMA_Init();
-
-	/* WLAN On API Implementation */
-	wlan_init(WLAN_Async_Callback, WLAN_Firmware_Patch, WLAN_Driver_Patch, WLAN_BootLoader_Patch,
-				CC3000_Read_Interrupt_Pin, CC3000_Interrupt_Enable, CC3000_Interrupt_Disable, CC3000_Write_Enable_Pin);
-
-	Delay(100);
+	vTaskDelay(100);
 
 	/* Trigger a WLAN device */
 	wlan_start(0);
@@ -432,7 +422,7 @@ void SPARK_WLAN_Loop(void)
 
 			CC3000_Write_Enable_Pin(WLAN_DISABLE);
 
-			Delay(100);
+			vTaskDelay(100);
 
 			if(WLAN_SMART_CONFIG_START)
 			{
@@ -492,7 +482,7 @@ void SPARK_WLAN_Loop(void)
 
 	if(WLAN_DHCP && !SPARK_WLAN_SLEEP && !SPARK_SOCKET_CONNECTED)
 	{
-		Delay(100);
+		vTaskDelay(100);
 
 		netapp_ipconfig(&ip_config);
 
@@ -504,9 +494,9 @@ void SPARK_WLAN_Loop(void)
 			while(Spark_Error_Count != 0)
 			{
 				LED_On(LED_RGB);
-				Delay(500);
+				vTaskDelay(500);
 				LED_Off(LED_RGB);
-				Delay(500);
+				vTaskDelay(500);
 				Spark_Error_Count--;
 			}
 

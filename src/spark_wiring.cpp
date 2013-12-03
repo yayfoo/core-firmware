@@ -493,7 +493,7 @@ void analogWrite(uint16_t pin, uint8_t value)
  */
 uint32_t millis()
 {
-	return TimingMillis;
+	return (uint32_t)xTaskGetTickCount();
 }
 
 /*
@@ -507,7 +507,7 @@ void delay(uint32_t ms)
 	//while(millis() - start < ms);
 	//OR
 	//Use the Delay() from main.c
-	Delay(ms);
+	vTaskDelay(ms);
 }
 
 /*

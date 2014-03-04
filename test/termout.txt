@@ -1,11 +1,164 @@
-setup() done!
 
-Connecting...
+trying to connecsttrafik.se/v1/hafas.
 
-
-Wait ten seconds.
-
-Connecting...
+    "name":"Buss 60",
 
 
-Wait ten seconds.
+Created line out of chars:
+    "name":"Buss 60",
+3-04",
+:"http://api.vasttrafik.se/v1/hafas.
+
+    "sname":"60",
+
+
+Created line out of chars:
+    "sname":"60",
+0",
+3-04",
+:"http://api.vasttrafik.se/v1/hafas.
+
+    "type":"BUS",
+
+
+Created line out of chars:
+    "type":"BUS",
+0",
+3-04",
+:"http://api.vasttrafik.se/v1/hafas.
+
+    "stopid":"9022014007900001",
+
+
+Created line out of chars:
+    "stopid":"9022014007900001",
+tp://api.vasttrafik.se/v1/hafas.
+
+    "stop":"..ver..svallen, G..teborg",
+
+
+Created line out of chars:
+    "stop":"..ver..svallen, G..teborg",
+i.vasttrafik.se/v1/hafas.
+
+    "time":"21:23",
+
+
+Created line out of chars:
+    "time":"21:23",
+vallen, G..teborg",
+i.vasttrafik.se/v1/hafas.
+
+    "date":"2014-03-04",
+
+
+Created line out of chars:
+    "date":"2014-03-04",
+n, G..teborg",
+i.vasttrafik.se/v1/hafas.
+
+    "journeyid":"9015014506000263",
+
+
+Created line out of chars:
+    "journeyid":"9015014506000263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "direction":"Masthugget",
+
+
+Created line out of chars:
+    "direction":"Masthugget",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "track":"A",
+
+
+Created line out of chars:
+    "track":"A",
+Masthugget",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "rtTime":"21:23",
+
+
+Created line out of chars:
+    "rtTime":"21:23",
+ugget",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+
+
+Waittime is 10 minutes
+
+    "rtDate":"2014-03-04",
+
+
+Created line out of chars:
+    "rtDate":"2014-03-04",
+",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "fgColor":"#00b6f1",
+
+
+Created line out of chars:
+    "fgColor":"#00b6f1",
+,
+",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "bgColor":"#c0dc39",
+
+
+Created line out of chars:
+    "bgColor":"#c0dc39",
+,
+",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "stroke":"Solid",
+
+
+Created line out of chars:
+    "stroke":"Solid",
+",
+,
+",
+263",
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "accessibility":"wheelChair",
+
+
+Created line out of chars:
+    "accessibility":"wheelChair",
+,
+g",
+i.vasttrafik.se/v1/hafas.
+
+    "JourneyDetailRef":{
+
+
+Created line out of chars:
+    "JourneyDetailRef":{
+lChair",
+,
+g",
+i.vasttrafik.se/v1/hafas.
+
+      "ref":"http://api.vasttrafik.se/bin/rest.exe/v1/journeyDetail?ref=221847%2F82606%2F170730%2F11422%2F80%3Fdate%3D2014-03-04%26station_ev

@@ -44,3 +44,5 @@ libraries/Arduino/
 
 # TropicSSL libraries
 libraries/Tropicssl/
+
+org.eclipse.cdt.core.prefs

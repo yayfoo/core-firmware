@@ -1,4 +1,4 @@
->>> VTDT_V0.7
+>>> VTDT_V0.8
 
 >>> Trying to connect (again after 10 s)...
 
@@ -6,7 +6,73 @@
 
 
 
->>> Waittime is 11 minutes!
+>>> Waittime is 10 minutes!
 
->>> Stopping client since time found.
+>>> Stopping client since time found...
+
+>>> Client stopped!
+
+>>> Trying to connect (again after 10 s)...
+
+>>> httpRequest() connecting...
+
+
+
+>>> Waittime is 10 minutes!
+
+>>> Stopping client since time found...
+
+>>> Client stopped!
+
+>>> Trying to connect (again after 10 s)...
+
+>>> httpRequest() connecting...
+
+
+
+>>> Waittime is 10 minutes!
+
+>>> Stopping client since time found...
+
+>>> Client stopped!
+
+>>> Trying to connect (again after 10 s)...
+
+>>> httpRequest() connecting...
+
+
+
+>>> Waittime is 10 minutes!
+
+>>> Stopping client since time found...
+
+>>> Client stopped!
+
+>>> Trying to connect (again after 10 s)...
+
+>>> httpRequest() connecting...
+
+
+
+>>> Waittime is 9 minutes!
+
+>>> Stopping client since time found...
+
+>>> Client stopped!
+
+>>> Trying to connect (again after 10 s)...
+
+>>> httpRequest() connecting...
+
+
+
+>>> Waittime is 9 minutes!
+
+>>> Stopping client since time found...
+
+>>> Client stopped!
+
+>>> Trying to connect (again after 10 s)...
+
+>>> httpRequest() connecting...
 

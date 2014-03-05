@@ -19,7 +19,6 @@ char server[] = "api.vasttrafik.se";
 TCPClient client;
 unsigned long lastConnectionTime = 0;           // last time you connected to the server, in milliseconds
 bool lastConnected = false;                  // state of the connection last time through the main loop
-bool lastAvailable = false;
 bool timeFound = false;
 const unsigned long postingInterval = 10*1000;  // delay between updates, in milliseconds
 char buff[BUFF_SIZE];
@@ -35,9 +34,8 @@ void setup() {
    pinMode(led, OUTPUT);
    //Initialize serial and wait for port to open:
    Serial.begin(9600);
-   delay(1000);
    count(10);
-   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.7");
+   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.8");
    if(SPRINTLVL>1) Serial.println();
 }
 
@@ -98,32 +96,21 @@ void loop() {
             }
             timeFound = true;
         }
-        lastAvailable = true;
     }
 
-    if (client.connected() && lastAvailable && timeFound) {
-        if(SPRINTLVL>1) Serial.println(">>> Stopping client since time found.");
+    if (client.connected() && timeFound) {
+        if(SPRINTLVL>1) Serial.println(">>> Stopping client since time found...");
         if(SPRINTLVL>1) Serial.println();
-        delay(300);
+        delay(500);
+        client.flush();
+        delay(500);
         client.stop();
-        lastAvailable = false;
-    }
-
-    if ( client.connected() && lastAvailable && !client.available() ) {
-        if(SPRINTLVL>1) Serial.println(">>> Stopping client since no more data.");
+        while(client.connected()) {
+        	//wait
+        	count(2);
+        }
+        if(SPRINTLVL>1) Serial.println(">>> Client stopped!");
         if(SPRINTLVL>1) Serial.println();
-        delay(300);
-        client.stop();
-        lastAvailable = false;
-    }
-
-    // if there's no net connection, but there was one last time
-    // through the loop, then stop the client:
-    if (!client.connected() && lastConnected) {
-        if(SPRINTLVL>1) Serial.println(">>> Disconnecting.");
-        if(SPRINTLVL>1) Serial.println();
-        delay(300);
-        client.stop();
     }
 
     // if you're not connected, and ten seconds have passed since

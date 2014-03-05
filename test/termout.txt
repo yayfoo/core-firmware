@@ -1,41 +1,10 @@
-VTDT_V0.5
+>>> VTDT_V0.6
 
-trying to connect again since ten seconds has passed...
-connecting...
-HTTP/1.1 200 OK
-Connection: close
-Transfer-Encoding: chunked
-Date: Tue, 04 Mar 2014 20:23:36 GMT
-Content-Type: application/javascript; charset=utf-8
-Server: Apache/2.2.9 (Debian) proxy_html/3.0.0 mod_ssl/2.2.9 OpenSSL/0.9.8g
-X-FE: v2
+>>> Trying to connect (again after 10 s)...
 
-3a1
-processJSON({
-"DepartureBoard":{
-  "noNamespaceSchemaLocation":"http://api.vasttrafik.se/v1/hafasRestDepartureBoard.xsd",
-  "servertime":"21:23",
-  "serverdate":"2014-03-04",
-  "Departure":{
-    "name":"Buss 60",
-    "sname":"60",
-    "type":"BUS",
-    "stopid":"9022014007900001",
-    "stop":"..ver..svallen, G..teborg",
-    "time":"21:23",
-    "date":"2014-03-04",
-    "journeyid":"9015014506000263",
-    "direction":"Masthugget",
-    "track":"A",
-    "rtTime":"21:23",
+>>> httpRequest() connecting...
 
 
-Waittime is 0 minutes
 
-    "rtDate":"2014-03-04",
-    "fgColor":"#00b6f1",
-    "bgColor":"#c0dc39",
-    "stroke":"Solid",
-    "accessibility":"wheelChair",
-    "JourneyDetailRef":{
-      "ref":"http://api.vasttrafik.se/bin/rest.exe/v1/journeyDetail?ref=402396%2F142789%2F594154%2F162951%2F80%3Fdate%3D2014-03-04%26station_evaId%3D7900001%26station_type%3Ddep%26authKey%3Df3c144b3-d974-490e-afc2-ff83d0f7b620%2
+>>> Waittime is 3 minutes!
+

@@ -2,41 +2,52 @@
 #include <stdio.h>
 #include <string.h>
 
+#define BUFF_SIZE 128
+
+// 0 - no serial output
+// 1 - print waittime
+// 2 - also print debug messages
+// 3 - also print http response
+#define SPRINTLVL 2
+
 void httpRequest(void);
 void count(int number);
 void blink(int onTime, int offTime);
 
-#define BUFF_SIZE 128
-struct time{
-    int hours;
-    int minutes;
-};
 int led = D7;
 char server[] = "api.vasttrafik.se";
 TCPClient client;
 unsigned long lastConnectionTime = 0;           // last time you connected to the server, in milliseconds
 bool lastConnected = false;                  // state of the connection last time through the main loop
-const unsigned long postingInterval = 10*1000;  // delay between updates, in milliseconds
 bool lastAvailable = false;
+bool timeFound = false;
+const unsigned long postingInterval = 10*1000;  // delay between updates, in milliseconds
 char buff[BUFF_SIZE];
-struct time servertime={0,0}, realtime={0,0};
 int waittime=0;
+struct time{
+    int hours;
+    int minutes;
+};
+struct time servertime={0,0}, realtime={0,0};
+
 
 void setup() {
    //Initialize serial and wait for port to open:
    Serial.begin(9600);
    delay(1000);
-   Serial.println("VTDT_V0.5");
+   count(10);
+   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.6");
+   if(SPRINTLVL>1) Serial.println();
 }
 
 void loop() {
-    while (client.available()) {
+    while (client.available() && !timeFound) {
         int index=0;
         char c;
         int i = 0;
         do {
             c = client.read();
-            Serial.write(c);
+            if(SPRINTLVL>2) Serial.write(c);
             buff[index++] = c;
             if(i++ > 10) {
                 delay(100);
@@ -74,22 +85,24 @@ void loop() {
             }
             waittime = waittime + realtime.minutes - servertime.minutes;
 
-            Serial.println();
-            Serial.println();
-            Serial.print("Waittime is ");
-            Serial.print(waittime);
-            Serial.print(" minutes");
-            Serial.println();
-            Serial.println();
+            if(SPRINTLVL>0) Serial.println();
+            if(SPRINTLVL>0) Serial.println();
+            if(SPRINTLVL>0) Serial.print(">>> Waittime is ");
+            if(SPRINTLVL>0) Serial.print(waittime);
+            if(SPRINTLVL>0) Serial.print(" minutes!");
+            if(SPRINTLVL>0) Serial.println();
+            if(SPRINTLVL>0) Serial.println();
             if (waittime < 20) {
                 count(waittime);
             }
+            timeFound = true;
         }
         lastAvailable = true;
     }
 
     if ( client.connected() && lastAvailable && !client.available() ) {
-        Serial.println("stopping client since no more data.");
+        if(SPRINTLVL>1) Serial.println(">>> Stopping client since no more data.");
+        if(SPRINTLVL>1) Serial.println();
         delay(300);
         client.stop();
         lastAvailable = false;
@@ -98,16 +111,17 @@ void loop() {
     // if there's no net connection, but there was one last time
     // through the loop, then stop the client:
     if (!client.connected() && lastConnected) {
-        Serial.println();
-        Serial.println("disconnecting.");
+        if(SPRINTLVL>1) Serial.println(">>> Disconnecting.");
+        if(SPRINTLVL>1) Serial.println();
         client.stop();
     }
 
     // if you're not connected, and ten seconds have passed since
     // your last connection, then connect again and send data:
     if(!client.connected() && (millis() - lastConnectionTime > postingInterval)) {
-        Serial.println();
-        Serial.println("trying to connect again since ten seconds has passed...");
+        if(SPRINTLVL>1) Serial.println(">>> Trying to connect (again after 10 s)...");
+        if(SPRINTLVL>1) Serial.println();
+        timeFound = false;
         httpRequest();
     }
     // store the state of the connection for next time through
@@ -119,7 +133,8 @@ void loop() {
 void httpRequest() {
     // if there's a successful connection:
     if (client.connect(server, 80)) {
-        Serial.println("connecting...");
+        if(SPRINTLVL>1) Serial.println(">>> httpRequest() connecting...");
+        if(SPRINTLVL>1) Serial.println();
         // send the HTTP PUT request:
         client.println("GET /bin/rest.exe/v1/departureBoard?authKey=f3c144b3-d974-490e-afc2-ff83d0f7b620&format=json&jsonpCallback=processJSON&id=9021014007900000&direction=9021014001760000&timeSpan=60&maxDeparturesPerLine=1 HTTP/1.1");
         client.println("Host: api.vasttrafik.se");
@@ -131,8 +146,9 @@ void httpRequest() {
         lastConnectionTime = millis();
     } else {
         // if you couldn't make a connection:
-        Serial.println("connection failed");
-        Serial.println("disconnecting.");
+        if(SPRINTLVL>1) Serial.println(">>> Connection failed!");
+        if(SPRINTLVL>1) Serial.println(">>> Disconnecting!");
+        if(SPRINTLVL>1) Serial.println();
         client.stop();
     }
 }

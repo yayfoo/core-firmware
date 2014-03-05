@@ -1,4 +1,4 @@
->>> VTDT_V0.6
+>>> VTDT_V0.7
 
 >>> Trying to connect (again after 10 s)...
 
@@ -6,5 +6,7 @@
 
 
 
->>> Waittime is 3 minutes!
+>>> Waittime is 11 minutes!
+
+>>> Stopping client since time found.
 

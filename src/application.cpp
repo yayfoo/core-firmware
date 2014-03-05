@@ -32,11 +32,12 @@ struct time servertime={0,0}, realtime={0,0};
 
 
 void setup() {
+   pinMode(led, OUTPUT);
    //Initialize serial and wait for port to open:
    Serial.begin(9600);
    delay(1000);
    count(10);
-   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.6");
+   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.7");
    if(SPRINTLVL>1) Serial.println();
 }
 
@@ -100,6 +101,14 @@ void loop() {
         lastAvailable = true;
     }
 
+    if (client.connected() && lastAvailable && timeFound) {
+        if(SPRINTLVL>1) Serial.println(">>> Stopping client since time found.");
+        if(SPRINTLVL>1) Serial.println();
+        delay(300);
+        client.stop();
+        lastAvailable = false;
+    }
+
     if ( client.connected() && lastAvailable && !client.available() ) {
         if(SPRINTLVL>1) Serial.println(">>> Stopping client since no more data.");
         if(SPRINTLVL>1) Serial.println();
@@ -113,6 +122,7 @@ void loop() {
     if (!client.connected() && lastConnected) {
         if(SPRINTLVL>1) Serial.println(">>> Disconnecting.");
         if(SPRINTLVL>1) Serial.println();
+        delay(300);
         client.stop();
     }
 

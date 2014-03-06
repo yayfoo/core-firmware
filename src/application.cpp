@@ -1,174 +1,116 @@
-/**
- ******************************************************************************
- * @file    application.cpp
- * @authors  Satish Nair, Zachary Crockett and Mohit Bhoite
- * @version V1.0.0
- * @date    05-November-2013
- * @brief   Tinker application
- ******************************************************************************
-  Copyright (c) 2013 Spark Labs, Inc.  All rights reserved.
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this program; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
- */
-
-/* Includes ------------------------------------------------------------------*/  
 #include "application.h"
 
-/* Function prototypes -------------------------------------------------------*/
-int tinkerDigitalRead(String pin);
-int tinkerDigitalWrite(String command);
-int tinkerAnalogRead(String pin);
-int tinkerAnalogWrite(String command);
+#define ON 1
+#define OFF 0
 
-/* This function is called once at start up ----------------------------------*/
-void setup()
-{
-	//Setup the Tinker application here
+int startFunction(String args);
+int trunkFunction(String args);
+int lockFunction(String args);
+int unlockFunction(String args);
 
-	//Register all the Tinker functions
-	Spark.function("digitalread", tinkerDigitalRead);
-	Spark.function("digitalwrite", tinkerDigitalWrite);
+int startState = 0;
+int trunkState = 0;
+int lockState = 0;
+int STARTPIN = D7;
+int TRUNKPIN = D6;
+int LOCKPIN = D5;
+int UNLOCKPIN = D4;
 
-	Spark.function("analogread", tinkerAnalogRead);
-	Spark.function("analogwrite", tinkerAnalogWrite);
+uint32_t UPDATE_INTERVAL = 10; // in milliseconds
+uint32_t FIFTEEN_MINUTES = 60*15*1000; // in milliseconds
 
+uint32_t lastTime = 0; // in milliseconds
+uint32_t startTime = 0; // in milliseconds
+
+void setup() {
+    pinMode(STARTPIN,OUTPUT);
+    pinMode(TRUNKPIN,OUTPUT);
+    pinMode(LOCKPIN,OUTPUT);
+    pinMode(UNLOCKPIN,OUTPUT);
+
+    digitalWrite(STARTPIN,LOW);
+    digitalWrite(TRUNKPIN,LOW);
+    digitalWrite(LOCKPIN,LOW);
+    digitalWrite(UNLOCKPIN,LOW);
+
+    Spark.function("start", startFunction);
+    Spark.function("trunk", trunkFunction);
+    Spark.function("lock", lockFunction);
+    Spark.function("unlock", unlockFunction);
+
+    Spark.variable("startstate", &startState, INT);
+    Spark.variable("trunkstate", &trunkState, INT);
+    Spark.variable("lockstate", &lockState, INT);
 }
 
-/* This function loops forever --------------------------------------------*/
-void loop()
-{
-	//This will run in a loop
+void loop() {
+    // Update the filter every 10ms (default)
+    if(millis() - lastTime > UPDATE_INTERVAL) {
+        // Set a new last time
+        lastTime = millis();
+
+        if(startState == ON) {
+            if(millis() - startTime > FIFTEEN_MINUTES) {
+                startState = OFF;
+            }
+        }
+    }
 }
 
-/*******************************************************************************
- * Function Name  : tinkerDigitalRead
- * Description    : Reads the digital value of a given pin
- * Input          : Pin 
- * Output         : None.
- * Return         : Value of the pin (0 or 1) in INT type
-                    Returns a negative number on failure
- *******************************************************************************/
-int tinkerDigitalRead(String pin)
-{
-	//convert ascii to integer
-	int pinNumber = pin.charAt(1) - '0';
-	//Sanity check to see if the pin numbers are within limits
-	if (pinNumber< 0 || pinNumber >7) return -1;
-
-	if(pin.startsWith("D"))
-	{
-		pinMode(pinNumber, INPUT_PULLDOWN);
-		return digitalRead(pinNumber);
-	}
-	else if (pin.startsWith("A"))
-	{
-		pinMode(pinNumber+10, INPUT_PULLDOWN);
-		return digitalRead(pinNumber+10);
-	}
-	return -2;
+int startFunction(String args) {
+    if(startState == OFF) {
+        startState = ON; // engine started
+        startTime = millis();
+        digitalWrite(STARTPIN, HIGH); // Double press the start button to start
+        delay(500);
+        digitalWrite(STARTPIN, LOW);
+        delay(1000);
+        digitalWrite(STARTPIN, HIGH);
+        delay(500);
+        digitalWrite(STARTPIN, LOW);
+        RGB.control(true);
+        RGB.color(255,0,0);
+        return 200; // This is checked in the web app controller for validation
+    }
+    else {
+        startState = OFF; // engine stopped
+        digitalWrite(STARTPIN, HIGH); // Single press the start button to stop
+        delay(500);
+        digitalWrite(STARTPIN, LOW);
+        RGB.control(false);
+        return 200; // This is checked in the web app controller for validation
+    }
 }
 
-/*******************************************************************************
- * Function Name  : tinkerDigitalWrite
- * Description    : Sets the specified pin HIGH or LOW
- * Input          : Pin and value
- * Output         : None.
- * Return         : 1 on success and a negative number on failure
- *******************************************************************************/
-int tinkerDigitalWrite(String command)
-{
-	bool value = 0;
-	//convert ascii to integer
-	int pinNumber = command.charAt(1) - '0';
-	//Sanity check to see if the pin numbers are within limits
-	if (pinNumber< 0 || pinNumber >7) return -1;
-
-	if(command.substring(3,7) == "HIGH") value = 1;
-	else if(command.substring(3,6) == "LOW") value = 0;
-	else return -2;
-
-	if(command.startsWith("D"))
-	{
-		pinMode(pinNumber, OUTPUT);
-		digitalWrite(pinNumber, value);
-		return 1;
-	}
-	else if(command.startsWith("A"))
-	{
-		pinMode(pinNumber+10, OUTPUT);
-		digitalWrite(pinNumber+10, value);
-		return 1;
-	}
-	else return -3;
+int trunkFunction(String args) {
+    if(trunkState == OFF) {
+        trunkState = ON; // trunk popped
+        digitalWrite(TRUNKPIN, HIGH); // Single press the trunk pop button
+        delay(500);
+        digitalWrite(TRUNKPIN, LOW);
+    }
+    else {
+        trunkState = OFF; // trunk closed
+    }
+    return 200; // This is checked in the web app controller for validation
 }
 
-/*******************************************************************************
- * Function Name  : tinkerAnalogRead
- * Description    : Reads the analog value of a pin
- * Input          : Pin 
- * Output         : None.
- * Return         : Returns the analog value in INT type (0 to 4095)
-                    Returns a negative number on failure
- *******************************************************************************/
-int tinkerAnalogRead(String pin)
-{
-	//convert ascii to integer
-	int pinNumber = pin.charAt(1) - '0';
-	//Sanity check to see if the pin numbers are within limits
-	if (pinNumber< 0 || pinNumber >7) return -1;
-
-	if(pin.startsWith("D"))
-	{
-		pinMode(pinNumber, INPUT);
-		return analogRead(pinNumber);
-	}
-	else if (pin.startsWith("A"))
-	{
-		pinMode(pinNumber+10, INPUT);
-		return analogRead(pinNumber+10);
-	}
-	return -2;
+int lockFunction(String args) {
+    if(lockState == OFF) {
+        lockState = ON; // locks locked
+        digitalWrite(LOCKPIN, HIGH); // Single press the lock button
+        delay(500);
+        digitalWrite(LOCKPIN, LOW);
+    }
+    return 200; // This is checked in the web app controller for validation
 }
 
-/*******************************************************************************
- * Function Name  : tinkerAnalogWrite
- * Description    : Writes an analog value (PWM) to the specified pin
- * Input          : Pin and Value (0 to 255)
- * Output         : None.
- * Return         : 1 on success and a negative number on failure
- *******************************************************************************/
-int tinkerAnalogWrite(String command)
-{
-	//convert ascii to integer
-	int pinNumber = command.charAt(1) - '0';
-	//Sanity check to see if the pin numbers are within limits
-	if (pinNumber< 0 || pinNumber >7) return -1;
-
-	String value = command.substring(3);
-
-	if(command.startsWith("D"))
-	{
-		pinMode(pinNumber, OUTPUT);
-		analogWrite(pinNumber, value.toInt());
-		return 1;
-	}
-	else if(command.startsWith("A"))
-	{
-		pinMode(pinNumber+10, OUTPUT);
-		analogWrite(pinNumber+10, value.toInt());
-		return 1;
-	}
-	else return -2;
+int unlockFunction(String args) {
+    if(lockState == ON) {
+        lockState = OFF; // locks unlocked
+        digitalWrite(UNLOCKPIN, HIGH); // Single press the unlock button
+        delay(500);
+        digitalWrite(UNLOCKPIN, LOW);
+    }
+    return 200; // This is checked in the web app controller for validation
 }

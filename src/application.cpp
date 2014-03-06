@@ -35,7 +35,7 @@ void setup() {
    //Initialize serial and wait for port to open:
    Serial.begin(9600);
    count(10);
-   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.8");
+   if(SPRINTLVL>1) Serial.println(">>> VTDT_V0.9");
    if(SPRINTLVL>1) Serial.println();
 }
 
@@ -93,6 +93,22 @@ void loop() {
             if(SPRINTLVL>0) Serial.println();
             if (waittime < 20) {
                 count(waittime);
+            }
+            RGB.control(true);
+            if (waittime < 2) {
+            	RGB.color(255,0,0); //red
+            }
+            else if (waittime < 5) {
+            	RGB.color(255,165,0); //orange
+            }
+            else if (waittime < 7) {
+            	RGB.color(255,255,0); //yellow
+            }
+            else if (waittime < 15) {
+            	RGB.color(0,255,0); //green
+            }
+            else {
+            	RGB.color(0,0,255); //blue
             }
             timeFound = true;
         }
